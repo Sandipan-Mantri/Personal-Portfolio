@@ -377,20 +377,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 7. CONTACT FORM — GOOGLE APPS SCRIPT BACKEND
+// 7. CONTACT FORM — FORMSUBMIT.CO HANDLER
 // ═══════════════════════════════════════════════════════════════════
+// Zero setup required. FormSubmit.co routes submissions directly to 
+// mantrisandipan@icloud.com.
 //
-//  STEP 1 ▶  Open  gas-backend.gs  from this project folder
-//  STEP 2 ▶  Go to https://script.google.com  →  + New project
-//  STEP 3 ▶  Delete all code  →  paste everything from gas-backend.gs
-//  STEP 4 ▶  Click Deploy → New deployment → ⚙ gear → Web app
-//             Execute as: Me  |  Who has access: Anyone  →  Deploy
-//  STEP 5 ▶  Authorize → Allow
-//  STEP 6 ▶  Copy the  Web app URL
-//  STEP 7 ▶  Paste it below replacing  YOUR_GAS_URL  →  Save
+// NOTE: On the VERY FIRST submission, you will receive a confirmation
+// email from FormSubmit.co. Click "Activate Form" in that email once,
+// and all future submissions will land directly in your inbox!
 // ═══════════════════════════════════════════════════════════════════
 
-const GAS_ENDPOINT = 'YOUR_GAS_URL'; // ← paste your Web app URL here
+const FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/mantrisandipan@icloud.com';
 
 async function submitForm() {
   const form    = document.getElementById('contact-form');
@@ -405,20 +402,11 @@ async function submitForm() {
 
   gsap.killTweensOf(formMsg);
 
-  // Guard: remind user to paste their GAS URL
-  if (!GAS_ENDPOINT || GAS_ENDPOINT === 'YOUR_GAS_URL') {
-    formMsg.style.display = 'block';
-    formMsg.style.opacity = '1';
-    formMsg.textContent   = '⚙️ Follow Steps 1-7 in main.js to connect the form to your email.';
-    formMsg.className     = 'form-status-msg error';
-    return;
-  }
-
   // Silently discard honeypot spam
   const botcheck = document.getElementById('botcheck');
   if (botcheck && botcheck.checked) { form.reset(); return; }
 
-  // ── Lock UI ────────────────────────────────────────────────────
+  // ── Lock UI while sending ──────────────────────────────────────
   const originalHTML = btn.innerHTML;
   btn.disabled       = true;
   btn.innerHTML      = 'Sending… <i class="fa-solid fa-circle-notch fa-spin" style="color:#030308;margin-left:6px;"></i>';
@@ -429,31 +417,43 @@ async function submitForm() {
   formMsg.textContent   = 'Sending your message…';
   formMsg.className     = 'form-status-msg info';
 
-  // ── POST to Google Apps Script ────────────────────────────────
-  // Using FormData (simple request = no CORS preflight needed)
+  // ── POST to FormSubmit.co ──────────────────────────────────────
   try {
-    const formData = new FormData();
-    formData.append('name',    name);
-    formData.append('email',   email);
-    formData.append('subject', subject);
-    formData.append('message', message);
-
-    // GAS doesn't return CORS headers, so we use no-cors.
-    // The request IS sent and GAS processes it — we can't read
-    // the response but the email & SMS will be delivered.
-    await fetch(GAS_ENDPOINT, {
-      method:   'POST',
-      body:     formData,
-      mode:     'no-cors'
+    const response = await fetch(FORMSUBMIT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        _subject: `Portfolio Contact: ${subject}`,
+        message: message,
+        _template: 'box' // Beautiful boxed template
+      })
     });
 
-    formMsg.textContent = `✅ Message sent, ${name}! I'll get back to you soon.`;
-    formMsg.className   = 'form-status-msg success';
-    form.reset();
+    const result = await response.json();
+
+    if (result.success === 'true' || result.success === true) {
+      formMsg.textContent = `✅ Message sent, ${name}! I'll get back to you soon.`;
+      formMsg.className   = 'form-status-msg success';
+      form.reset();
+    } else {
+      // Check if it's the activation email requirement
+      if (result.message && (result.message.toLowerCase().includes('activate') || result.message.toLowerCase().includes('confirm') || result.message.toLowerCase().includes('first'))) {
+        formMsg.textContent = `📩 Check your mail: FormSubmit sent an activation email to mantrisandipan@icloud.com. Please click the link inside it to activate your form!`;
+        formMsg.className   = 'form-status-msg info';
+        form.reset();
+      } else {
+        throw new Error(result.message || 'Something went wrong.');
+      }
+    }
 
   } catch (err) {
     console.error('Send error:', err);
-    formMsg.textContent = '❌ Failed to send. Please check your connection and try again.';
+    formMsg.textContent = `❌ Failed to send: ${err.message || 'Please check your connection and try again.'}`;
     formMsg.className   = 'form-status-msg error';
   }
 
@@ -462,7 +462,7 @@ async function submitForm() {
   btn.innerHTML = originalHTML;
   form.querySelectorAll('.form-control').forEach(el => el.disabled = false);
 
-  // Auto-fade banner after 8 s
+  // Auto-fade banner after 10 s
   setTimeout(() => {
     gsap.to(formMsg, {
       opacity: 0, duration: 1,
@@ -471,8 +471,9 @@ async function submitForm() {
         formMsg.style.opacity = '1';
       }
     });
-  }, 8000);
+  }, 10000);
 }
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 
