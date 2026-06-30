@@ -499,6 +499,73 @@ async function submitForm() {
   }, 10000);
 }
 
+// 8. SCROLL-WALKING CHARACTER CONTROLLER
+// ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const character = document.getElementById('walking-character');
+  const innerChar = document.getElementById('walking-character-inner');
+  const speechBubble = document.getElementById('character-speech');
+  
+  if (!character || !innerChar) return;
+
+  let lastScrollY = window.scrollY;
+  let scrollTimeout = null;
+
+  const speechQuotes = [
+    "Hi! I'm Sandipan 👋",
+    "Keep scrolling! 🚀",
+    "Coding is my superpower! 💻",
+    "AI & ML student here! 🧠",
+    "Designing experiences... ✨",
+    "Let's build something epic! 🛠️",
+    "Need a developer? Contact me! 📬"
+  ];
+
+  function randomizeSpeech() {
+    const idx = Math.floor(Math.random() * speechQuotes.length);
+    if (speechBubble) speechBubble.textContent = speechQuotes[idx];
+  }
+
+  character.addEventListener('mouseenter', randomizeSpeech);
+  character.addEventListener('click', () => {
+    randomizeSpeech();
+    gsap.fromTo(character, { scale: 1 }, { scale: 1.2, duration: 0.15, yoyo: true, repeat: 1 });
+  });
+
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if (maxScroll <= 0) return;
+    
+    const scrollPercent = currentScrollY / maxScroll;
+    const minPct = 8;
+    const maxPct = 92;
+    const currentPct = minPct + (scrollPercent * (maxPct - minPct));
+    
+    gsap.to(character, {
+      left: `${currentPct}%`,
+      duration: 0.4,
+      ease: 'power1.out'
+    });
+
+    if (currentScrollY > lastScrollY) {
+      innerChar.style.transform = 'scaleX(1)';
+    } else if (currentScrollY < lastScrollY) {
+      innerChar.style.transform = 'scaleX(-1)';
+    }
+
+    character.classList.add('is-walking');
+
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      character.classList.remove('is-walking');
+    }, 150);
+
+    lastScrollY = currentScrollY;
+  });
+});
+
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 

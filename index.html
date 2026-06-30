@@ -577,6 +577,64 @@
     </div>
   </footer>
 
+  <!-- Scroll-Walking Character -->
+  <div class="scroll-track-container">
+    <div class="scroll-track-line"></div>
+    <div class="walking-character" id="walking-character">
+      <div class="character-speech" id="character-speech">Hi! I'm Sandipan 👋</div>
+      <div class="walking-character-inner" id="walking-character-inner">
+        <svg class="walking-avatar-svg" viewBox="0 0 100 120" width="80" height="96">
+          <!-- Hair back -->
+          <path d="M 35 30 Q 30 20 40 15 Q 50 10 60 15 Q 70 20 65 30 Z" fill="#111" />
+          
+          <!-- Right Leg -->
+          <g class="leg right-leg">
+            <path d="M 55 75 L 58 105" stroke="#222" stroke-width="8" stroke-linecap="round" fill="none" />
+            <path d="M 58 105 L 68 105" stroke="#fff" stroke-width="9" stroke-linecap="round" />
+          </g>
+
+          <!-- Left Leg -->
+          <g class="leg left-leg">
+            <path d="M 45 75 L 42 105" stroke="#222" stroke-width="8" stroke-linecap="round" fill="none" />
+            <path d="M 42 105 L 32 105" stroke="#fff" stroke-width="9" stroke-linecap="round" />
+          </g>
+
+          <!-- Torso (Black Shirt) -->
+          <path d="M 35 48 C 35 48 25 75 38 78 L 62 78 C 75 75 65 48 65 48 Z" fill="#18181f" />
+          <path d="M 45 48 L 50 56 L 55 48" stroke="#333" stroke-width="2" fill="none" />
+
+          <!-- Left Arm -->
+          <g class="arm left-arm">
+            <path d="M 35 50 L 28 68" stroke="#18181f" stroke-width="6" stroke-linecap="round" fill="none" />
+            <circle cx="28" cy="70" r="4" fill="#d9a07e" />
+          </g>
+          <!-- Right Arm -->
+          <g class="arm right-arm">
+            <path d="M 65 50 L 72 68" stroke="#18181f" stroke-width="6" stroke-linecap="round" fill="none" />
+            <circle cx="72" cy="70" r="4" fill="#d9a07e" />
+          </g>
+
+          <!-- Head -->
+          <circle cx="50" cy="38" r="14" fill="#d9a07e" />
+          
+          <!-- Face features -->
+          <circle cx="45" cy="36" r="1.5" fill="#222" />
+          <circle cx="55" cy="36" r="1.5" fill="#222" />
+          <path d="M 47 43 Q 50 46 53 43" stroke="#222" stroke-width="1.5" stroke-linecap="round" fill="none" />
+          
+          <!-- Curly Hair Front -->
+          <circle cx="38" cy="24" r="6" fill="#111" />
+          <circle cx="48" cy="22" r="7" fill="#111" />
+          <circle cx="58" cy="24" r="6" fill="#111" />
+          <circle cx="44" cy="28" r="6" fill="#111" />
+          <circle cx="52" cy="28" r="6" fill="#111" />
+          <circle cx="36" cy="30" r="5" fill="#111" />
+          <circle cx="62" cy="30" r="5" fill="#111" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
   <!-- CDN Script Loading: Three.js & GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
