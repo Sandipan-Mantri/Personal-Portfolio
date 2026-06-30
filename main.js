@@ -233,8 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .from('.hero-subtitle', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
       .from('.hero-desc', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
       .from('.hero-buttons', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
-      .from('.hero-visual', { scale: 0.5, opacity: 0, duration: 1.2, ease: 'elastic.out(1, 0.5)' }, '-=0.8')
-      .from('.hero-badge', { y: 30, opacity: 0, duration: 0.8, ease: 'power2.out', stagger: 0.2 }, '-=0.8');
+      .from('.hero-visual', { scale: 0.5, opacity: 0, duration: 1.2, ease: 'elastic.out(1, 0.5)' }, '-=0.8');
 
     // Section Titles reveal
     document.querySelectorAll('.section-title').forEach(title => {
