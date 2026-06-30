@@ -377,58 +377,177 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 7. CONTACT FORM — MAILTO HANDLER
-// Zero setup required. When user clicks Send, their email app opens pre-filled.
-// They click Send in their email app and the message goes straight to your inbox.
-function submitForm() {
-  const form     = document.getElementById('contact-form');
-  const name     = document.getElementById('name').value.trim();
-  const email    = document.getElementById('email').value.trim();
-  const subject  = document.getElementById('subject').value.trim();
-  const message  = document.getElementById('message').value.trim();
-  const formMsg  = document.getElementById('form-status');
+// // 7. EMAILJS + FAST2SMS — Email & SMS notification on every contact form submit
+// ═══════════════════════════════════════════════════════════════════════════════
+//
+// ── EMAIL SETUP (EmailJS — free, ~3 min) ────────────────────────────────────
+//
+//  STEP 1 ▶  Go to https://emailjs.com → "Sign Up Free" → sign in with Google
+//
+//  STEP 2 ▶  Dashboard → Email Services → Add New Service
+//             Choose Gmail or iCloud → connect → Create Service
+//             Copy the  Service ID  (e.g. service_abc123)
+//
+//  STEP 3 ▶  Dashboard → Email Templates → Create New Template
+//             • Set "To Email" field to:  mantrisandipan@icloud.com
+//             • Paste this in the template body:
+//
+//                 New message from your portfolio contact form!
+//
+//                 Name:    {{from_name}}
+//                 Email:   {{from_email}}
+//                 Subject: {{subject}}
+//
+//                 Message:
+//                 {{message}}
+//
+//             Click Save. Copy the  Template ID  (e.g. template_xyz789)
+//
+//  STEP 4 ▶  Account (top-right avatar) → General → copy your  Public Key
+//
+//  STEP 5 ▶  Paste the 3 values below ↓
+//
+// ── SMS SETUP (Fast2SMS — free credits on sign-up, ~2 min) ─────────────────
+//
+//  STEP 6 ▶  Go to https://www.fast2sms.com → Sign Up (free)
+//
+//  STEP 7 ▶  Dashboard → Dev API → copy your  API Key
+//
+//  STEP 8 ▶  Paste it below ↓
+//
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Paste your keys here ─────────────────────────────────────────
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';      // Step 2
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';     // Step 3
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';      // Step 4
+const FAST2SMS_API_KEY    = 'YOUR_FAST2SMS_API_KEY';// Step 7
+// ─────────────────────────────────────────────────────────────────
+
+const NOTIFY_PHONE        = '7797711005'; // your number (no +91)
+
+// Initialise EmailJS once with your public key
+(function () {
+  if (typeof emailjs !== 'undefined') {
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+  }
+})();
+
+// ── SMS helper (Fast2SMS, fire-and-forget) ───────────────────────
+async function sendSMSNotification(name, email, subject) {
+  if (!FAST2SMS_API_KEY || FAST2SMS_API_KEY === 'YOUR_FAST2SMS_API_KEY') {
+    console.info('Fast2SMS not configured — SMS skipped.');
+    return;
+  }
+  const smsText =
+    `New Portfolio Contact!\n` +
+    `From: ${name}\n` +
+    `Email: ${email}\n` +
+    `Subject: ${subject}`;
+
+  const url =
+    `https://www.fast2sms.com/dev/bulkV2` +
+    `?authorization=${encodeURIComponent(FAST2SMS_API_KEY)}` +
+    `&route=q` +
+    `&message=${encodeURIComponent(smsText)}` +
+    `&flash=0` +
+    `&numbers=${NOTIFY_PHONE}`;
+
+  // mode:'no-cors' — browser can't read the response but the SMS IS sent
+  await fetch(url, { method: 'GET', mode: 'no-cors' });
+}
+
+// ── Main form handler ─────────────────────────────────────────────
+async function submitForm() {
+  const form    = document.getElementById('contact-form');
+  const name    = document.getElementById('name').value.trim();
+  const email   = document.getElementById('email').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const message = document.getElementById('message').value.trim();
+  const formMsg = document.getElementById('form-status');
+  const btn     = document.getElementById('submit-btn');
 
   if (!name || !email || !subject || !message) return;
 
-  // Kill any running GSAP animations on formMsg to avoid conflict
   gsap.killTweensOf(formMsg);
 
-  // Build the full email body including sender details
-  const fullBody =
-    `Name: ${name}\n` +
-    `Email: ${email}\n` +
-    `\n` +
-    `Message:\n${message}`;
-
-  // Encode for mailto URL
-  const mailtoLink =
-    `mailto:mantrisandipan@icloud.com` +
-    `?subject=${encodeURIComponent('Portfolio Contact: ' + subject)}` +
-    `&body=${encodeURIComponent(fullBody)}`;
-
-  // Open the user's default email app with everything pre-filled
-  window.location.href = mailtoLink;
-
-  // Show a helpful success message
-  if (formMsg) {
-    formMsg.style.display  = 'block';
-    formMsg.style.opacity  = '1';
-    formMsg.textContent    = `Almost done, ${name}! Your email app has opened with everything pre-filled — just click Send to deliver your message.`;
-    formMsg.className      = 'form-status-msg success';
+  // Guard: EmailJS keys not set yet
+  if (
+    EMAILJS_SERVICE_ID  === 'YOUR_SERVICE_ID'  ||
+    EMAILJS_TEMPLATE_ID === 'YOUR_TEMPLATE_ID' ||
+    EMAILJS_PUBLIC_KEY  === 'YOUR_PUBLIC_KEY'
+  ) {
+    formMsg.style.display = 'block';
+    formMsg.style.opacity = '1';
+    formMsg.textContent   = '⚙️ Email not configured yet — follow Steps 1-5 in main.js.';
+    formMsg.className     = 'form-status-msg error';
+    return;
   }
 
-  // Reset the form fields
-  form.reset();
+  // Guard: EmailJS SDK failed to load
+  if (typeof emailjs === 'undefined') {
+    formMsg.style.display = 'block';
+    formMsg.style.opacity = '1';
+    formMsg.textContent   = 'EmailJS SDK failed to load. Please refresh the page.';
+    formMsg.className     = 'form-status-msg error';
+    return;
+  }
 
-  // Fade out the status banner after 8 seconds
+  // Silently discard honeypot spam
+  const botcheck = document.getElementById('botcheck');
+  if (botcheck && botcheck.checked) { form.reset(); return; }
+
+  // ── Lock UI while sending ─────────────────────────────────────
+  const originalHTML = btn.innerHTML;
+  btn.disabled       = true;
+  btn.innerHTML      = 'Sending… <i class="fa-solid fa-circle-notch fa-spin" style="color:#030308;margin-left:6px;"></i>';
+  form.querySelectorAll('.form-control').forEach(el => el.disabled = true);
+
+  formMsg.style.display = 'block';
+  formMsg.style.opacity = '1';
+  formMsg.textContent   = 'Sending your message…';
+  formMsg.className     = 'form-status-msg info';
+
+  // ── Fire email + SMS together ─────────────────────────────────
+  try {
+    // Email (awaited — primary)
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      from_name:  name,
+      from_email: email,
+      subject:    subject,
+      message:    message,
+      reply_to:   email
+    });
+
+    // SMS (parallel, non-blocking — secondary)
+    sendSMSNotification(name, email, subject).catch(e =>
+      console.warn('SMS skipped:', e)
+    );
+
+    formMsg.textContent = `✅ Message sent, ${name}! I'll get back to you soon.`;
+    formMsg.className   = 'form-status-msg success';
+    form.reset();
+
+  } catch (err) {
+    console.error('Send error:', err);
+    formMsg.textContent = `❌ Failed to send: ${err?.text || err?.message || 'Please try again.'}`;
+    formMsg.className   = 'form-status-msg error';
+  }
+
+  // ── Restore UI ────────────────────────────────────────────────
+  btn.disabled  = false;
+  btn.innerHTML = originalHTML;
+  form.querySelectorAll('.form-control').forEach(el => el.disabled = false);
+
+  // Auto-fade banner after 8 s
   setTimeout(() => {
     gsap.to(formMsg, {
-      opacity: 0,
-      duration: 1,
+      opacity: 0, duration: 1,
       onComplete: () => {
-        formMsg.style.display  = 'none';
-        formMsg.style.opacity  = '1';
+        formMsg.style.display = 'none';
+        formMsg.style.opacity = '1';
       }
     });
   }, 8000);
 }
+
