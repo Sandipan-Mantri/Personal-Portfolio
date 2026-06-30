@@ -377,87 +377,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// // 7. EMAILJS + FAST2SMS — Email & SMS notification on every contact form submit
-// ═══════════════════════════════════════════════════════════════════════════════
+// 7. CONTACT FORM — GOOGLE APPS SCRIPT BACKEND
+// ═══════════════════════════════════════════════════════════════════
 //
-// ── EMAIL SETUP (EmailJS — free, ~3 min) ────────────────────────────────────
-//
-//  STEP 1 ▶  Go to https://emailjs.com → "Sign Up Free" → sign in with Google
-//
-//  STEP 2 ▶  Dashboard → Email Services → Add New Service
-//             Choose Gmail or iCloud → connect → Create Service
-//             Copy the  Service ID  (e.g. service_abc123)
-//
-//  STEP 3 ▶  Dashboard → Email Templates → Create New Template
-//             • Set "To Email" field to:  mantrisandipan@icloud.com
-//             • Paste this in the template body:
-//
-//                 New message from your portfolio contact form!
-//
-//                 Name:    {{from_name}}
-//                 Email:   {{from_email}}
-//                 Subject: {{subject}}
-//
-//                 Message:
-//                 {{message}}
-//
-//             Click Save. Copy the  Template ID  (e.g. template_xyz789)
-//
-//  STEP 4 ▶  Account (top-right avatar) → General → copy your  Public Key
-//
-//  STEP 5 ▶  Paste the 3 values below ↓
-//
-// ── SMS SETUP (Fast2SMS — free credits on sign-up, ~2 min) ─────────────────
-//
-//  STEP 6 ▶  Go to https://www.fast2sms.com → Sign Up (free)
-//
-//  STEP 7 ▶  Dashboard → Dev API → copy your  API Key
-//
-//  STEP 8 ▶  Paste it below ↓
-//
-// ═══════════════════════════════════════════════════════════════════════════════
+//  STEP 1 ▶  Open  gas-backend.gs  from this project folder
+//  STEP 2 ▶  Go to https://script.google.com  →  + New project
+//  STEP 3 ▶  Delete all code  →  paste everything from gas-backend.gs
+//  STEP 4 ▶  Click Deploy → New deployment → ⚙ gear → Web app
+//             Execute as: Me  |  Who has access: Anyone  →  Deploy
+//  STEP 5 ▶  Authorize → Allow
+//  STEP 6 ▶  Copy the  Web app URL
+//  STEP 7 ▶  Paste it below replacing  YOUR_GAS_URL  →  Save
+// ═══════════════════════════════════════════════════════════════════
 
-// ── Paste your keys here ─────────────────────────────────────────
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';      // Step 2
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';     // Step 3
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';      // Step 4
-const FAST2SMS_API_KEY    = 'YOUR_FAST2SMS_API_KEY';// Step 7
-// ─────────────────────────────────────────────────────────────────
+const GAS_ENDPOINT = 'YOUR_GAS_URL'; // ← paste your Web app URL here
 
-const NOTIFY_PHONE        = '7797711005'; // your number (no +91)
-
-// Initialise EmailJS once with your public key
-(function () {
-  if (typeof emailjs !== 'undefined') {
-    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-  }
-})();
-
-// ── SMS helper (Fast2SMS, fire-and-forget) ───────────────────────
-async function sendSMSNotification(name, email, subject) {
-  if (!FAST2SMS_API_KEY || FAST2SMS_API_KEY === 'YOUR_FAST2SMS_API_KEY') {
-    console.info('Fast2SMS not configured — SMS skipped.');
-    return;
-  }
-  const smsText =
-    `New Portfolio Contact!\n` +
-    `From: ${name}\n` +
-    `Email: ${email}\n` +
-    `Subject: ${subject}`;
-
-  const url =
-    `https://www.fast2sms.com/dev/bulkV2` +
-    `?authorization=${encodeURIComponent(FAST2SMS_API_KEY)}` +
-    `&route=q` +
-    `&message=${encodeURIComponent(smsText)}` +
-    `&flash=0` +
-    `&numbers=${NOTIFY_PHONE}`;
-
-  // mode:'no-cors' — browser can't read the response but the SMS IS sent
-  await fetch(url, { method: 'GET', mode: 'no-cors' });
-}
-
-// ── Main form handler ─────────────────────────────────────────────
 async function submitForm() {
   const form    = document.getElementById('contact-form');
   const name    = document.getElementById('name').value.trim();
@@ -471,24 +405,11 @@ async function submitForm() {
 
   gsap.killTweensOf(formMsg);
 
-  // Guard: EmailJS keys not set yet
-  if (
-    EMAILJS_SERVICE_ID  === 'YOUR_SERVICE_ID'  ||
-    EMAILJS_TEMPLATE_ID === 'YOUR_TEMPLATE_ID' ||
-    EMAILJS_PUBLIC_KEY  === 'YOUR_PUBLIC_KEY'
-  ) {
+  // Guard: remind user to paste their GAS URL
+  if (!GAS_ENDPOINT || GAS_ENDPOINT === 'YOUR_GAS_URL') {
     formMsg.style.display = 'block';
     formMsg.style.opacity = '1';
-    formMsg.textContent   = '⚙️ Email not configured yet — follow Steps 1-5 in main.js.';
-    formMsg.className     = 'form-status-msg error';
-    return;
-  }
-
-  // Guard: EmailJS SDK failed to load
-  if (typeof emailjs === 'undefined') {
-    formMsg.style.display = 'block';
-    formMsg.style.opacity = '1';
-    formMsg.textContent   = 'EmailJS SDK failed to load. Please refresh the page.';
+    formMsg.textContent   = '⚙️ Follow Steps 1-7 in main.js to connect the form to your email.';
     formMsg.className     = 'form-status-msg error';
     return;
   }
@@ -497,7 +418,7 @@ async function submitForm() {
   const botcheck = document.getElementById('botcheck');
   if (botcheck && botcheck.checked) { form.reset(); return; }
 
-  // ── Lock UI while sending ─────────────────────────────────────
+  // ── Lock UI ────────────────────────────────────────────────────
   const originalHTML = btn.innerHTML;
   btn.disabled       = true;
   btn.innerHTML      = 'Sending… <i class="fa-solid fa-circle-notch fa-spin" style="color:#030308;margin-left:6px;"></i>';
@@ -508,21 +429,23 @@ async function submitForm() {
   formMsg.textContent   = 'Sending your message…';
   formMsg.className     = 'form-status-msg info';
 
-  // ── Fire email + SMS together ─────────────────────────────────
+  // ── POST to Google Apps Script ────────────────────────────────
+  // Using FormData (simple request = no CORS preflight needed)
   try {
-    // Email (awaited — primary)
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-      from_name:  name,
-      from_email: email,
-      subject:    subject,
-      message:    message,
-      reply_to:   email
-    });
+    const formData = new FormData();
+    formData.append('name',    name);
+    formData.append('email',   email);
+    formData.append('subject', subject);
+    formData.append('message', message);
 
-    // SMS (parallel, non-blocking — secondary)
-    sendSMSNotification(name, email, subject).catch(e =>
-      console.warn('SMS skipped:', e)
-    );
+    // GAS doesn't return CORS headers, so we use no-cors.
+    // The request IS sent and GAS processes it — we can't read
+    // the response but the email & SMS will be delivered.
+    await fetch(GAS_ENDPOINT, {
+      method:   'POST',
+      body:     formData,
+      mode:     'no-cors'
+    });
 
     formMsg.textContent = `✅ Message sent, ${name}! I'll get back to you soon.`;
     formMsg.className   = 'form-status-msg success';
@@ -530,11 +453,11 @@ async function submitForm() {
 
   } catch (err) {
     console.error('Send error:', err);
-    formMsg.textContent = `❌ Failed to send: ${err?.text || err?.message || 'Please try again.'}`;
+    formMsg.textContent = '❌ Failed to send. Please check your connection and try again.';
     formMsg.className   = 'form-status-msg error';
   }
 
-  // ── Restore UI ────────────────────────────────────────────────
+  // ── Restore UI ─────────────────────────────────────────────────
   btn.disabled  = false;
   btn.innerHTML = originalHTML;
   form.querySelectorAll('.form-control').forEach(el => el.disabled = false);
@@ -550,4 +473,6 @@ async function submitForm() {
     });
   }, 8000);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
 
