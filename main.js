@@ -377,115 +377,58 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 7. FORMSPREE CONTACT FORM SUBMIT HANDLER
-// No key needed — Formspree routes to your email automatically.
-// On the FIRST ever submission you will get a one-click confirmation email
-// from Formspree to mantrisandipan@icloud.com. Click it once, and from
-// then on every message goes straight to your inbox. Free, no sign-up.
-async function submitForm() {
-  // Formspree endpoint — routes submissions directly to mantrisandipan@icloud.com
-  // No API key or sign-up needed. On the very first submission, Formspree will
-  // send a one-click confirmation email to your iCloud. Click it once and all
-  // future messages will arrive in your inbox automatically.
-  const FORMSPREE_ENDPOINT = "https://formspree.io/f/mantrisandipan@icloud.com";
-
-  const form = document.getElementById('contact-form');
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const subject = document.getElementById('subject').value.trim();
-  const message = document.getElementById('message').value.trim();
-  const botcheck = document.getElementById('botcheck').checked;
-  const formMsg = document.getElementById('form-status');
+// 7. CONTACT FORM — MAILTO HANDLER
+// Zero setup required. When user clicks Send, their email app opens pre-filled.
+// They click Send in their email app and the message goes straight to your inbox.
+function submitForm() {
+  const form     = document.getElementById('contact-form');
+  const name     = document.getElementById('name').value.trim();
+  const email    = document.getElementById('email').value.trim();
+  const subject  = document.getElementById('subject').value.trim();
+  const message  = document.getElementById('message').value.trim();
+  const formMsg  = document.getElementById('form-status');
 
   if (!name || !email || !subject || !message) return;
 
   // Kill any running GSAP animations on formMsg to avoid conflict
   gsap.killTweensOf(formMsg);
 
-  // Silently block spam bots that fill in the hidden honeypot field
-  if (botcheck) {
-    if (formMsg) {
-      formMsg.style.display = 'block';
-      formMsg.style.opacity = '1';
-      formMsg.textContent = `Thank you, ${name}! Your message has been sent.`;
-      formMsg.className = 'form-status-msg success';
-    }
-    form.reset();
-    return;
-  }
+  // Build the full email body including sender details
+  const fullBody =
+    `Name: ${name}\n` +
+    `Email: ${email}\n` +
+    `\n` +
+    `Message:\n${message}`;
 
-  // Lock the UI while sending
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const originalBtnHTML = submitBtn.innerHTML;
-  const inputs = form.querySelectorAll('.form-control');
+  // Encode for mailto URL
+  const mailtoLink =
+    `mailto:mantrisandipan@icloud.com` +
+    `?subject=${encodeURIComponent('Portfolio Contact: ' + subject)}` +
+    `&body=${encodeURIComponent(fullBody)}`;
 
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = 'Sending... <i class="fa-solid fa-circle-notch fa-spin" style="color: #030308; margin-left: 6px;"></i>';
-  inputs.forEach(input => input.disabled = true);
+  // Open the user's default email app with everything pre-filled
+  window.location.href = mailtoLink;
 
+  // Show a helpful success message
   if (formMsg) {
-    formMsg.style.display = 'block';
-    formMsg.style.opacity = '1';
-    formMsg.textContent = 'Sending your message...';
-    formMsg.className = 'form-status-msg info';
+    formMsg.style.display  = 'block';
+    formMsg.style.opacity  = '1';
+    formMsg.textContent    = `Almost done, ${name}! Your email app has opened with everything pre-filled — just click Send to deliver your message.`;
+    formMsg.className      = 'form-status-msg success';
   }
 
-  try {
-    const response = await fetch(FORMSPREE_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        name: name,
-        email: email,
-        subject: `Portfolio Contact: ${subject}`,
-        message: message
-      })
-    });
+  // Reset the form fields
+  form.reset();
 
-    const result = await response.json();
-
-    if (response.ok) {
-      if (formMsg) {
-        formMsg.textContent = `Thank you, ${name}! Your message has been sent successfully.`;
-        formMsg.className = 'form-status-msg success';
+  // Fade out the status banner after 8 seconds
+  setTimeout(() => {
+    gsap.to(formMsg, {
+      opacity: 0,
+      duration: 1,
+      onComplete: () => {
+        formMsg.style.display  = 'none';
+        formMsg.style.opacity  = '1';
       }
-      form.reset();
-    } else {
-      // Formspree returns errors in result.errors array
-      const errMsg = result.errors
-        ? result.errors.map(e => e.message).join(', ')
-        : 'Something went wrong. Please try again.';
-      throw new Error(errMsg);
-    }
-  } catch (error) {
-    console.error('Form submission error:', error);
-    if (formMsg) {
-      formMsg.textContent = `Failed to send: ${error.message}`;
-      formMsg.className = 'form-status-msg error';
-    }
-  } finally {
-    // Restore the UI
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalBtnHTML;
-    inputs.forEach(input => input.disabled = false);
-
-    // Fade out the status banner after 7 seconds
-    if (formMsg) {
-      setTimeout(() => {
-        gsap.to(formMsg, {
-          opacity: 0,
-          duration: 1,
-          onComplete: () => {
-            formMsg.style.display = 'none';
-            formMsg.style.opacity = '1';
-          }
-        });
-      }, 7000);
-    }
-  }
+    });
+  }, 8000);
 }
-
-
