@@ -718,96 +718,275 @@ header.scrolled {
 }
 
 /* --- TECHNICAL SKILLS SECTION --- */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 32px;
+#skills {
+  position: relative;
+  overflow: hidden;
 }
 
-.skills-category {
+#skills-bg-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+#skills .section-container {
+  position: relative;
+  z-index: 1;
+}
+
+.skills-table-wrapper {
+  perspective: 1200px;
+}
+
+.skills-table {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 242, 254, 0.2);
 }
 
-.skills-category-title {
-  font-size: 1.4rem;
-  margin-bottom: 8px;
+.skills-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+  padding: 32px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.skills-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.05) 0%, rgba(157, 78, 221, 0.05) 100%);
+  z-index: -1;
+}
+
+.skills-row:last-child {
+  border-bottom: none;
+}
+
+.skills-row:hover {
+  background: rgba(22, 22, 45, 0.3);
+  transform: translateX(8px);
+}
+
+.skills-row-1::before {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.08) 0%, rgba(157, 78, 221, 0.03) 100%);
+}
+
+.skills-row-2::before {
+  background: linear-gradient(135deg, rgba(157, 78, 221, 0.08) 0%, rgba(0, 242, 254, 0.03) 100%);
+}
+
+.skills-row-3::before {
+  background: linear-gradient(135deg, rgba(0, 150, 136, 0.08) 0%, rgba(157, 78, 221, 0.03) 100%);
+}
+
+.skills-row-header {
+  margin-bottom: 20px;
+}
+
+.skills-row-title {
+  font-size: 1.3rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.skills-category-title i {
+.skills-row-title i {
   color: var(--accent-cyan);
+  font-size: 1.5rem;
 }
 
-.skills-list {
-  display: flex;
-  flex-direction: column;
+.skills-row:hover .skills-row-title i {
+  animation: iconGlow 0.6s ease-in-out;
+}
+
+.skills-row-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
 
-.skill-card {
-  background: rgba(13, 13, 27, 0.3);
-  border: 1px solid var(--border-light);
+.skill-item {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.skills-row:nth-child(1) .skill-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.skills-row:nth-child(1) .skill-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.skills-row:nth-child(1) .skill-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.skills-row:nth-child(1) .skill-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.skills-row:nth-child(1) .skill-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.skills-row:nth-child(1) .skill-item:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.skills-row:nth-child(2) .skill-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.skills-row:nth-child(2) .skill-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.skills-row:nth-child(2) .skill-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.skills-row:nth-child(2) .skill-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.skills-row:nth-child(2) .skill-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.skills-row:nth-child(2) .skill-item:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.skills-row:nth-child(3) .skill-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.skills-row:nth-child(3) .skill-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.skills-row:nth-child(3) .skill-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.skills-row:nth-child(3) .skill-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.skills-row:nth-child(3) .skill-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.skills-row:nth-child(3) .skill-item:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.skill-badge {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(157, 78, 221, 0.1) 100%);
+  border: 1px solid rgba(0, 242, 254, 0.3);
   border-radius: 12px;
-  padding: 16px 20px;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  transition: var(--transition-smooth);
-}
-
-.skill-card:hover {
-  border-color: var(--border-hover);
-  background: rgba(22, 22, 45, 0.5);
-  transform: translateX(4px);
-  box-shadow: 0 4px 15px rgba(0, 242, 254, 0.05);
-}
-
-.skill-info {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.skill-icon-wrap {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  display: flex;
   justify-content: center;
-  align-items: center;
-  color: var(--color-text-secondary);
-  transition: var(--transition-fast);
-}
-
-.skill-card:hover .skill-icon-wrap {
-  background: rgba(0, 242, 254, 0.1);
-  color: var(--accent-cyan);
-}
-
-.skill-name {
+  gap: 10px;
+  font-size: 0.95rem;
   font-weight: 600;
-  font-size: 1rem;
+  color: var(--color-text-primary);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  height: 50px;
 }
 
-.skill-level-badge {
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.skill-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s ease;
+  z-index: 0;
 }
 
-.skill-card:hover .skill-level-badge {
-  background: rgba(0, 242, 254, 0.1);
+.skill-badge:hover::before {
+  left: 100%;
+}
+
+.skill-badge i {
+  font-size: 1.2rem;
   color: var(--accent-cyan);
-  border-color: rgba(0, 242, 254, 0.2);
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.skill-badge span {
+  position: relative;
+  z-index: 1;
+}
+
+.skill-badge:hover {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.25) 0%, rgba(157, 78, 221, 0.15) 100%);
+  border-color: rgba(0, 242, 254, 0.6);
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(0, 242, 254, 0.3), 0 0 20px rgba(157, 78, 221, 0.2);
+}
+
+.skill-badge:hover i {
+  transform: rotateY(360deg) scale(1.2);
+  color: var(--accent-purple);
+  text-shadow: 0 0 15px rgba(157, 78, 221, 0.6);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iconGlow {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* --- PROJECTS SECTION --- */
@@ -1743,10 +1922,21 @@ footer {
 }
 
 /* Transform origins for limbs */
-.left-leg { transform-origin: 45px 75px; }
-.right-leg { transform-origin: 55px 75px; }
-.left-arm { transform-origin: 35px 50px; }
-.right-arm { transform-origin: 65px 50px; }
+.left-leg {
+  transform-origin: 45px 75px;
+}
+
+.right-leg {
+  transform-origin: 55px 75px;
+}
+
+.left-arm {
+  transform-origin: 35px 50px;
+}
+
+.right-arm {
+  transform-origin: 65px 50px;
+}
 
 /* Walking animation keyframes */
 .walking-character.is-walking .left-leg {
@@ -1770,28 +1960,53 @@ footer {
 }
 
 @keyframes leg-swing-left {
-  0% { transform: rotate(-28deg); }
-  100% { transform: rotate(28deg); }
+  0% {
+    transform: rotate(-28deg);
+  }
+
+  100% {
+    transform: rotate(28deg);
+  }
 }
 
 @keyframes leg-swing-right {
-  0% { transform: rotate(28deg); }
-  100% { transform: rotate(-28deg); }
+  0% {
+    transform: rotate(28deg);
+  }
+
+  100% {
+    transform: rotate(-28deg);
+  }
 }
 
 @keyframes arm-swing-left {
-  0% { transform: rotate(-18deg); }
-  100% { transform: rotate(18deg); }
+  0% {
+    transform: rotate(-18deg);
+  }
+
+  100% {
+    transform: rotate(18deg);
+  }
 }
 
 @keyframes arm-swing-right {
-  0% { transform: rotate(18deg); }
-  100% { transform: rotate(-18deg); }
+  0% {
+    transform: rotate(18deg);
+  }
+
+  100% {
+    transform: rotate(-18deg);
+  }
 }
 
 @keyframes char-bob {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-3px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  100% {
+    transform: translateY(-3px);
+  }
 }
 
 /* Custom styles when user is idle or hovering */
@@ -1800,9 +2015,19 @@ footer {
 }
 
 @keyframes char-wave {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-3deg); }
-  75% { transform: rotate(3deg); }
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-3deg);
+  }
+
+  75% {
+    transform: rotate(3deg);
+  }
 }
 
 /* Hide on mobile devices for cleaner layout */

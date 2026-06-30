@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Hover states for links and interactive items
-    const hoverables = document.querySelectorAll('a, button, input, textarea, .skill-card, .project-card, .strength-tag');
+    const hoverables = document.querySelectorAll('a, button, input, textarea, .skill-card, .skill-badge, .project-card, .strength-tag');
     hoverables.forEach(item => {
       item.addEventListener('mouseenter', () => {
         cursor.classList.add('hover');
@@ -272,17 +272,30 @@ document.addEventListener('DOMContentLoaded', () => {
       ease: 'power2.out'
     });
 
-    // Skills Card staggering
-    gsap.from('.skills-category', {
+    // Skills Row staggering for table layout
+    gsap.from('.skills-row', {
       scrollTrigger: {
-        trigger: '.skills-grid',
+        trigger: '.skills-table-wrapper',
         start: 'top 75%'
       },
       opacity: 0,
-      y: 50,
+      x: -50,
       duration: 0.8,
-      stagger: 0.2,
+      stagger: 0.15,
       ease: 'power2.out'
+    });
+
+    // Skill badges animation with stagger
+    gsap.from('.skill-badge', {
+      scrollTrigger: {
+        trigger: '.skills-table-wrapper',
+        start: 'top 75%'
+      },
+      opacity: 0,
+      scale: 0.5,
+      duration: 0.6,
+      stagger: 0.05,
+      ease: 'back.out(1.5)'
     });
 
     // Project grid cards staggering
@@ -389,13 +402,13 @@ document.addEventListener('DOMContentLoaded', () => {
 const FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/mantrisandipan@icloud.com';
 
 async function submitForm() {
-  const form    = document.getElementById('contact-form');
-  const name    = document.getElementById('name').value.trim();
-  const email   = document.getElementById('email').value.trim();
+  const form = document.getElementById('contact-form');
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
   const subject = document.getElementById('subject').value.trim();
   const message = document.getElementById('message').value.trim();
   const formMsg = document.getElementById('form-status');
-  const btn     = document.getElementById('submit-btn');
+  const btn = document.getElementById('submit-btn');
 
   if (!name || !email || !subject || !message) return;
 
@@ -411,8 +424,8 @@ async function submitForm() {
   if (window.location.protocol === 'file:') {
     formMsg.style.display = 'block';
     formMsg.style.opacity = '1';
-    formMsg.textContent   = 'Submitting message via secure browser redirect...';
-    formMsg.className     = 'form-status-msg info';
+    formMsg.textContent = 'Submitting message via secure browser redirect...';
+    formMsg.className = 'form-status-msg info';
 
     form.action = 'https://formsubmit.co/mantrisandipan@icloud.com';
     form.method = 'POST';
@@ -433,14 +446,14 @@ async function submitForm() {
 
   // ── Lock UI while sending (For Web Server HTTP/HTTPS) ──────────
   const originalHTML = btn.innerHTML;
-  btn.disabled       = true;
-  btn.innerHTML      = 'Sending… <i class="fa-solid fa-circle-notch fa-spin" style="color:#030308;margin-left:6px;"></i>';
+  btn.disabled = true;
+  btn.innerHTML = 'Sending… <i class="fa-solid fa-circle-notch fa-spin" style="color:#030308;margin-left:6px;"></i>';
   form.querySelectorAll('.form-control').forEach(el => el.disabled = true);
 
   formMsg.style.display = 'block';
   formMsg.style.opacity = '1';
-  formMsg.textContent   = 'Sending your message…';
-  formMsg.className     = 'form-status-msg info';
+  formMsg.textContent = 'Sending your message…';
+  formMsg.className = 'form-status-msg info';
 
   // ── POST to FormSubmit.co ──────────────────────────────────────
   try {
@@ -463,13 +476,13 @@ async function submitForm() {
 
     if (result.success === 'true' || result.success === true) {
       formMsg.textContent = `✅ Message sent, ${name}! I'll get back to you soon.`;
-      formMsg.className   = 'form-status-msg success';
+      formMsg.className = 'form-status-msg success';
       form.reset();
     } else {
       // Check if it's the activation email requirement
       if (result.message && (result.message.toLowerCase().includes('activate') || result.message.toLowerCase().includes('confirm') || result.message.toLowerCase().includes('first'))) {
         formMsg.textContent = `📩 Check your mail: FormSubmit sent an activation email to mantrisandipan@icloud.com. Please click the link inside it to activate your form!`;
-        formMsg.className   = 'form-status-msg info';
+        formMsg.className = 'form-status-msg info';
         form.reset();
       } else {
         throw new Error(result.message || 'Something went wrong.');
@@ -479,11 +492,11 @@ async function submitForm() {
   } catch (err) {
     console.error('Send error:', err);
     formMsg.textContent = `❌ Failed to send: ${err.message || 'Please check your connection and try again.'}`;
-    formMsg.className   = 'form-status-msg error';
+    formMsg.className = 'form-status-msg error';
   }
 
   // ── Restore UI ─────────────────────────────────────────────────
-  btn.disabled  = false;
+  btn.disabled = false;
   btn.innerHTML = originalHTML;
   form.querySelectorAll('.form-control').forEach(el => el.disabled = false);
 
@@ -505,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const character = document.getElementById('walking-character');
   const innerChar = document.getElementById('walking-character-inner');
   const speechBubble = document.getElementById('character-speech');
-  
+
   if (!character || !innerChar) return;
 
   let lastScrollY = window.scrollY;
@@ -536,12 +549,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentScrollY = window.scrollY;
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     if (maxScroll <= 0) return;
-    
+
     const scrollPercent = currentScrollY / maxScroll;
     const minPct = 8;
     const maxPct = 92;
     const currentPct = minPct + (scrollPercent * (maxPct - minPct));
-    
+
     gsap.to(character, {
       left: `${currentPct}%`,
       duration: 0.4,

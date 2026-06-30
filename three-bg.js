@@ -117,9 +117,11 @@ function initThree() {
 }
 
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  if (camera && renderer) {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
 }
 
 function onDocumentMouseMove(event) {
@@ -152,30 +154,45 @@ function animate() {
   const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight || 1);
 
   // Transition camera depth and tilt depending on scroll
-  camera.position.z = 130 + Math.sin(scrollPercent * Math.PI) * 60;
-  camera.position.y = -scrollPercent * 80;
-  camera.position.x = Math.sin(scrollPercent * Math.PI) * 30;
-  camera.lookAt(new THREE.Vector3(Math.sin(scrollPercent * Math.PI) * 20, -scrollPercent * 50, 0));
-  window.addEventListener('DOMContentLoaded', () => {
-    // Update progress bar during loading
-    const progressVal = document.getElementById('loader-progress');
-    const statusVal = document.getElementById('loader-status');
+  if (camera) {
+    camera.position.z = 130 + Math.sin(scrollPercent * Math.PI) * 60;
+    camera.position.y = -scrollPercent * 80;
+    camera.position.x = Math.sin(scrollPercent * Math.PI) * 30;
+    camera.lookAt(new THREE.Vector3(Math.sin(scrollPercent * Math.PI) * 20, -scrollPercent * 50, 0));
+  }
 
-    if (progressVal) progressVal.style.width = '40%';
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera);
+  }
+}
 
-    setTimeout(() => {
-      if (progressVal) progressVal.style.width = '75%';
-      if (statusVal) statusVal.textContent = 'Building Constellations...';
-    }, 300);
+// Setup progress loader and init
+function startThreeApp() {
+  // Update progress bar during loading
+  const progressVal = document.getElementById('loader-progress');
+  const statusVal = document.getElementById('loader-status');
 
-    setTimeout(() => {
-      try {
-        initThree();
-        if (progressVal) progressVal.style.width = '100%';
-        if (statusVal) statusVal.textContent = 'Ready!';
-      } catch (e) {
-        console.error("Three.js initialization failed: ", e);
-        if (statusVal) statusVal.textContent = 'Hardware Acceleration Unavailable. Loading fallback...';
-      }
-    }, 600);
-  });
+  if (progressVal) progressVal.style.width = '40%';
+
+  setTimeout(() => {
+    if (progressVal) progressVal.style.width = '75%';
+    if (statusVal) statusVal.textContent = 'Building Constellations...';
+  }, 300);
+
+  setTimeout(() => {
+    try {
+      initThree();
+      if (progressVal) progressVal.style.width = '100%';
+      if (statusVal) statusVal.textContent = 'Ready!';
+    } catch (e) {
+      console.error("Three.js initialization failed: ", e);
+      if (statusVal) statusVal.textContent = 'Hardware Acceleration Unavailable. Loading fallback...';
+    }
+  }, 600);
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', startThreeApp);
+} else {
+  startThreeApp();
+}
