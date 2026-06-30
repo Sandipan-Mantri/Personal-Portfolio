@@ -377,19 +377,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 7. SECURE WEB3FORMS CONTACT FORM SUBMIT HANDLER
+// 7. FORMSPREE CONTACT FORM SUBMIT HANDLER
+// No key needed — Formspree routes to your email automatically.
+// On the FIRST ever submission you will get a one-click confirmation email
+// from Formspree to mantrisandipan@icloud.com. Click it once, and from
+// then on every message goes straight to your inbox. Free, no sign-up.
 async function submitForm() {
-  // --- CONFIGURATION ---
-  // To receive contact form emails in your inbox, generate a free key at https://web3forms.com/
-  // and paste it here replacing "YOUR_ACCESS_KEY_HERE":
-  const WEB3FORMS_ACCESS_KEY = "YOUR_ACCESS_KEY_HERE";
-  // ---------------------
+  // Formspree endpoint — routes submissions directly to mantrisandipan@icloud.com
+  // No API key or sign-up needed. On the very first submission, Formspree will
+  // send a one-click confirmation email to your iCloud. Click it once and all
+  // future messages will arrive in your inbox automatically.
+  const FORMSPREE_ENDPOINT = "https://formspree.io/f/mantrisandipan@icloud.com";
 
   const form = document.getElementById('contact-form');
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const subject = document.getElementById('subject').value;
-  const message = document.getElementById('message').value;
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const message = document.getElementById('message').value.trim();
   const botcheck = document.getElementById('botcheck').checked;
   const formMsg = document.getElementById('form-status');
 
@@ -398,36 +402,23 @@ async function submitForm() {
   // Kill any running GSAP animations on formMsg to avoid conflict
   gsap.killTweensOf(formMsg);
 
-  // If user hasn't set their key, show a configuration warning
-  if (WEB3FORMS_ACCESS_KEY === "YOUR_ACCESS_KEY_HERE" || !WEB3FORMS_ACCESS_KEY) {
-    if (formMsg) {
-      formMsg.style.display = 'block';
-      formMsg.style.opacity = '1';
-      formMsg.textContent = "Please configure your Web3Forms Access Key in main.js (around line 386) to receive emails.";
-      formMsg.className = "form-status-msg error";
-    }
-    return;
-  }
-
-  // If honeypot botcheck is checked, silently swallow submission (spam mitigation)
+  // Silently block spam bots that fill in the hidden honeypot field
   if (botcheck) {
-    console.warn("Spam detected and blocked via honeypot field.");
     if (formMsg) {
       formMsg.style.display = 'block';
       formMsg.style.opacity = '1';
-      formMsg.textContent = `Thank you, ${name}! Your message has been sent successfully.`;
-      formMsg.className = "form-status-msg success";
+      formMsg.textContent = `Thank you, ${name}! Your message has been sent.`;
+      formMsg.className = 'form-status-msg success';
     }
     form.reset();
     return;
   }
 
-  // Prepare UI for sending state
+  // Lock the UI while sending
   const submitBtn = form.querySelector('button[type="submit"]');
   const originalBtnHTML = submitBtn.innerHTML;
   const inputs = form.querySelectorAll('.form-control');
 
-  // Disable inputs and button, show loading status
   submitBtn.disabled = true;
   submitBtn.innerHTML = 'Sending... <i class="fa-solid fa-circle-notch fa-spin" style="color: #030308; margin-left: 6px;"></i>';
   inputs.forEach(input => input.disabled = true);
@@ -435,53 +426,53 @@ async function submitForm() {
   if (formMsg) {
     formMsg.style.display = 'block';
     formMsg.style.opacity = '1';
-    formMsg.textContent = "Sending your message...";
-    formMsg.className = "form-status-msg info";
+    formMsg.textContent = 'Sending your message...';
+    formMsg.className = 'form-status-msg info';
   }
 
   try {
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
+    const response = await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json"
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
-        access_key: WEB3FORMS_ACCESS_KEY,
         name: name,
         email: email,
         subject: `Portfolio Contact: ${subject}`,
-        message: message,
-        from_name: name
+        message: message
       })
     });
 
-    const result = await response.ok ? await response.json() : null;
+    const result = await response.json();
 
-    if (response.ok && result && result.success) {
-      // Success state
+    if (response.ok) {
       if (formMsg) {
         formMsg.textContent = `Thank you, ${name}! Your message has been sent successfully.`;
-        formMsg.className = "form-status-msg success";
+        formMsg.className = 'form-status-msg success';
       }
       form.reset();
     } else {
-      throw new Error(result?.message || "Failed to submit form data to the server.");
+      // Formspree returns errors in result.errors array
+      const errMsg = result.errors
+        ? result.errors.map(e => e.message).join(', ')
+        : 'Something went wrong. Please try again.';
+      throw new Error(errMsg);
     }
   } catch (error) {
-    console.error("Form submission error:", error);
-    // Error state
+    console.error('Form submission error:', error);
     if (formMsg) {
-      formMsg.textContent = `Error: ${error.message || "Failed to send message. Please check your internet connection."}`;
-      formMsg.className = "form-status-msg error";
+      formMsg.textContent = `Failed to send: ${error.message}`;
+      formMsg.className = 'form-status-msg error';
     }
   } finally {
-    // Restore buttons and inputs
+    // Restore the UI
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalBtnHTML;
     inputs.forEach(input => input.disabled = false);
 
-    // Fade out status message after 7 seconds
+    // Fade out the status banner after 7 seconds
     if (formMsg) {
       setTimeout(() => {
         gsap.to(formMsg, {
@@ -496,4 +487,5 @@ async function submitForm() {
     }
   }
 }
+
 
