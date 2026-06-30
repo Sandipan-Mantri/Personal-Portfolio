@@ -406,7 +406,33 @@ async function submitForm() {
   const botcheck = document.getElementById('botcheck');
   if (botcheck && botcheck.checked) { form.reset(); return; }
 
-  // ── Lock UI while sending ──────────────────────────────────────
+  // ── Local File Protocol (CORS Bypass) ──────────────────────────
+  // If index.html is opened directly as a local file (file://),
+  // AJAX fetch is blocked by CORS. We bypass this by submitting traditionally.
+  if (window.location.protocol === 'file:') {
+    formMsg.style.display = 'block';
+    formMsg.style.opacity = '1';
+    formMsg.textContent   = 'Submitting message via secure browser redirect...';
+    formMsg.className     = 'form-status-msg info';
+
+    form.action = 'https://formsubmit.co/mantrisandipan@icloud.com';
+    form.method = 'POST';
+
+    // Add config fields dynamically
+    let templateInput = form.querySelector('input[name="_template"]');
+    if (!templateInput) {
+      templateInput = document.createElement('input');
+      templateInput.type = 'hidden';
+      templateInput.name = '_template';
+      templateInput.value = 'box';
+      form.appendChild(templateInput);
+    }
+
+    form.submit();
+    return;
+  }
+
+  // ── Lock UI while sending (For Web Server HTTP/HTTPS) ──────────
   const originalHTML = btn.innerHTML;
   btn.disabled       = true;
   btn.innerHTML      = 'Sending… <i class="fa-solid fa-circle-notch fa-spin" style="color:#030308;margin-left:6px;"></i>';
