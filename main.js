@@ -377,34 +377,123 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 7. DUMMY SECURE FORM SUBMIT HANDLER
-function submitForm() {
+// 7. SECURE WEB3FORMS CONTACT FORM SUBMIT HANDLER
+async function submitForm() {
+  // --- CONFIGURATION ---
+  // To receive contact form emails in your inbox, generate a free key at https://web3forms.com/
+  // and paste it here replacing "YOUR_ACCESS_KEY_HERE":
+  const WEB3FORMS_ACCESS_KEY = "YOUR_ACCESS_KEY_HERE";
+  // ---------------------
+
+  const form = document.getElementById('contact-form');
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
   const subject = document.getElementById('subject').value;
   const message = document.getElementById('message').value;
+  const botcheck = document.getElementById('botcheck').checked;
   const formMsg = document.getElementById('form-status');
 
   if (!name || !email || !subject || !message) return;
 
+  // Kill any running GSAP animations on formMsg to avoid conflict
+  gsap.killTweensOf(formMsg);
+
+  // If user hasn't set their key, show a configuration warning
+  if (WEB3FORMS_ACCESS_KEY === "YOUR_ACCESS_KEY_HERE" || !WEB3FORMS_ACCESS_KEY) {
+    if (formMsg) {
+      formMsg.style.display = 'block';
+      formMsg.style.opacity = '1';
+      formMsg.textContent = "Please configure your Web3Forms Access Key in main.js (around line 386) to receive emails.";
+      formMsg.className = "form-status-msg error";
+    }
+    return;
+  }
+
+  // If honeypot botcheck is checked, silently swallow submission (spam mitigation)
+  if (botcheck) {
+    console.warn("Spam detected and blocked via honeypot field.");
+    if (formMsg) {
+      formMsg.style.display = 'block';
+      formMsg.style.opacity = '1';
+      formMsg.textContent = `Thank you, ${name}! Your message has been sent successfully.`;
+      formMsg.className = "form-status-msg success";
+    }
+    form.reset();
+    return;
+  }
+
+  // Prepare UI for sending state
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalBtnHTML = submitBtn.innerHTML;
+  const inputs = form.querySelectorAll('.form-control');
+
+  // Disable inputs and button, show loading status
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = 'Sending... <i class="fa-solid fa-circle-notch fa-spin" style="color: #030308; margin-left: 6px;"></i>';
+  inputs.forEach(input => input.disabled = true);
+
   if (formMsg) {
     formMsg.style.display = 'block';
-    formMsg.textContent = `Thank you, ${name}! Your message regarding "${subject}" has been logged locally.`;
-    formMsg.className = 'form-status-msg success';
+    formMsg.style.opacity = '1';
+    formMsg.textContent = "Sending your message...";
+    formMsg.className = "form-status-msg info";
+  }
 
-    // Clear inputs
-    document.getElementById('contact-form').reset();
+  try {
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_ACCESS_KEY,
+        name: name,
+        email: email,
+        subject: `Portfolio Contact: ${subject}`,
+        message: message,
+        from_name: name
+      })
+    });
 
-    // Fade out status message after 5 seconds
-    setTimeout(() => {
-      gsap.to(formMsg, {
-        opacity: 0,
-        duration: 1,
-        onComplete: () => {
-          formMsg.style.display = 'none';
-          formMsg.style.opacity = '1';
-        }
-      });
-    }, 5000);
+    const result = await response.ok ? await response.json() : null;
+
+    if (response.ok && result && result.success) {
+      // Success state
+      if (formMsg) {
+        formMsg.textContent = `Thank you, ${name}! Your message has been sent successfully.`;
+        formMsg.className = "form-status-msg success";
+      }
+      form.reset();
+    } else {
+      throw new Error(result?.message || "Failed to submit form data to the server.");
+    }
+  } catch (error) {
+    console.error("Form submission error:", error);
+    // Error state
+    if (formMsg) {
+      formMsg.textContent = `Error: ${error.message || "Failed to send message. Please check your internet connection."}`;
+      formMsg.className = "form-status-msg error";
+    }
+  } finally {
+    // Restore buttons and inputs
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalBtnHTML;
+    inputs.forEach(input => input.disabled = false);
+
+    // Fade out status message after 7 seconds
+    if (formMsg) {
+      setTimeout(() => {
+        gsap.to(formMsg, {
+          opacity: 0,
+          duration: 1,
+          onComplete: () => {
+            formMsg.style.display = 'none';
+            formMsg.style.opacity = '1';
+          }
+        });
+      }, 7000);
+    }
   }
 }
+

@@ -1433,6 +1433,20 @@ textarea.form-control {
   border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
+.form-status-msg.error {
+  display: block;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.form-status-msg.info {
+  display: block;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
 /* --- FOOTER --- */
 footer {
   border-top: 1px solid var(--border-light);

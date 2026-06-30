@@ -568,12 +568,12 @@
               <textarea id="message" class="form-control" placeholder="Hello Sandipan, I'd like to discuss..."
                 required></textarea>
             </div>
+            <!-- Spam Protection -->
+            <input type="checkbox" name="botcheck" id="botcheck" class="hidden" style="display: none;">
             <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
               Send Message <i class="fa-solid fa-paper-plane" style="color: #030308;"></i>
             </button>
-            <div class="form-status-msg success" id="form-status">
-              Message sent successfully! Thank you for reaching out.
-            </div>
+            <div class="form-status-msg" id="form-status"></div>
           </form>
         </div>
 
