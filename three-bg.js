@@ -3,26 +3,9 @@
 let scene, camera, renderer, particleSystem;
 let mouseX = 0, mouseY = 0;
 let targetX = 0, targetY = 0;
-let scrollPercent = 0;
-let cachedScrollHeight = 0;
-let cachedWindowHeight = 0;
-let animationFrameId = null;
-const lookAtTarget = { x: 0, y: 0, z: 0 }; // Pre-allocated to avoid GC pressure
 
-let windowHalfX = window.innerWidth / 2;
-let windowHalfY = window.innerHeight / 2;
-const isMobileDevice = window.matchMedia('(pointer: coarse), (max-width: 1024px)').matches || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-const isSlowNetwork = connection && /2g|slow-2g/.test(connection.effectiveType || '');
-const lowDeviceMemory = navigator.deviceMemory && navigator.deviceMemory <= 2;
-const isPerformanceConstrained = isMobileDevice || prefersReducedMotion || isSlowNetwork || lowDeviceMemory;
-const desiredPixelRatio = Math.min(window.devicePixelRatio || 1, isPerformanceConstrained ? 1 : 1.5);
-
-function updateWindowDimensions() {
-  windowHalfX = window.innerWidth / 2;
-  windowHalfY = window.innerHeight / 2;
-}
+const windowHalfX = window.innerWidth / 2;
+const windowHalfY = window.innerHeight / 2;
 
 // Generate glowing circular texture for particles using HTML5 canvas (no external image needed)
 function createParticleTexture() {
@@ -56,7 +39,7 @@ function initThree() {
   camera.position.z = 150;
 
   // Particles Geometry
-  const particleCount = isMobileDevice ? 650 : 1200;
+  const particleCount = 2500;
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
@@ -119,66 +102,27 @@ function initThree() {
   scene.add(particleSystem);
 
   // WebGL Renderer
-  renderer = new THREE.WebGLRenderer({
-    antialias: false,
-    alpha: true,
-    powerPreference: 'high-performance'
-  });
-  renderer.setPixelRatio(desiredPixelRatio);
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(scene.fog.color, 1);
   container.appendChild(renderer.domElement);
 
   // Event Listeners
-  if (!isPerformanceConstrained) {
-    document.addEventListener('mousemove', onDocumentMouseMove);
-  }
+  document.addEventListener('mousemove', onDocumentMouseMove);
   window.addEventListener('resize', onWindowResize);
 
-  // Initial caching of heights and scroll listener setup
-  updateScrollDimensions();
-  window.addEventListener('scroll', onDocumentScroll, { passive: true });
-
-  // Pause render when tab is hidden and restart when visible
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-      }
-    } else if (!animationFrameId) {
-      animate();
-    }
-  });
-
-  // Start animation loop only if the page is visible
-  if (!document.hidden) {
-    animate();
-  }
-}
-
-function updateScrollDimensions() {
-  cachedScrollHeight = document.documentElement.scrollHeight;
-  cachedWindowHeight = window.innerHeight;
-  scrollPercent = window.scrollY / (cachedScrollHeight - cachedWindowHeight || 1);
-}
-
-function onDocumentScroll() {
-  scrollPercent = window.scrollY / (cachedScrollHeight - cachedWindowHeight || 1);
+  // Start animation loop
+  animate();
 }
 
 function onWindowResize() {
-  if (camera && renderer) {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-  updateWindowDimensions();
-  updateScrollDimensions();
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function onDocumentMouseMove(event) {
-  if (isMobileDevice) return;
   // Normalize coordinates (-1 to 1)
   mouseX = (event.clientX - windowHalfX) / 100;
   mouseY = (event.clientY - windowHalfY) / 100;
@@ -186,7 +130,7 @@ function onDocumentMouseMove(event) {
 
 // Animation loop
 function animate() {
-  animationFrameId = requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 
   // Smooth mouse interpolation (easing)
   targetX += (mouseX - targetX) * 0.08;
@@ -195,57 +139,43 @@ function animate() {
   // Enhanced rotation + mouse interaction with wobble effect
   if (particleSystem) {
     const time = Date.now();
-    const rotationSpeed = isPerformanceConstrained ? 0.00004 : 0.0001;
-    const rotationSpeedAlt = isPerformanceConstrained ? 0.00002 : 0.00006;
-    const wobbleSpeed = isPerformanceConstrained ? 0.00001 : 0.00003;
-    const pulseSpeed = isPerformanceConstrained ? 0.00035 : 0.0005;
-
-    particleSystem.rotation.y = time * rotationSpeed + (targetX * 0.12);
-    particleSystem.rotation.x = time * rotationSpeedAlt + (targetY * 0.12);
-    particleSystem.rotation.z = Math.sin(time * wobbleSpeed) * 0.2;
+    particleSystem.rotation.y = time * 0.0001 + (targetX * 0.15);
+    particleSystem.rotation.x = time * 0.00006 + (targetY * 0.15);
+    particleSystem.rotation.z = Math.sin(time * 0.00003) * 0.3;
 
     // Scale pulse effect based on time
-    const scale = 1 + Math.sin(time * pulseSpeed) * 0.04;
+    const scale = 1 + Math.sin(time * 0.0005) * 0.08;
     particleSystem.scale.set(scale, scale, scale);
   }
 
-  if (renderer && scene && camera) {
-    renderer.render(scene, camera);
-  }
-}
+  // Scroll responsive camera motion with enhanced depth
+  const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight || 1);
 
-// Setup progress loader and init
-function startThreeApp() {
-  const progressVal = document.getElementById('loader-progress');
-  const statusVal = document.getElementById('loader-status');
+  // Transition camera depth and tilt depending on scroll
+  camera.position.z = 130 + Math.sin(scrollPercent * Math.PI) * 60;
+  camera.position.y = -scrollPercent * 80;
+  camera.position.x = Math.sin(scrollPercent * Math.PI) * 30;
+  camera.lookAt(new THREE.Vector3(Math.sin(scrollPercent * Math.PI) * 20, -scrollPercent * 50, 0));
+  window.addEventListener('DOMContentLoaded', () => {
+    // Update progress bar during loading
+    const progressVal = document.getElementById('loader-progress');
+    const statusVal = document.getElementById('loader-status');
 
-  if (progressVal) progressVal.style.width = '40%';
+    if (progressVal) progressVal.style.width = '40%';
 
-  if (isMobileDevice) {
-    if (statusVal) statusVal.textContent = 'Mobile device detected. Optimizing background...';
-    if (progressVal) progressVal.style.width = '100%';
-    return;
-  }
+    setTimeout(() => {
+      if (progressVal) progressVal.style.width = '75%';
+      if (statusVal) statusVal.textContent = 'Building Constellations...';
+    }, 300);
 
-  setTimeout(() => {
-    if (progressVal) progressVal.style.width = '75%';
-    if (statusVal) statusVal.textContent = 'Building Constellations...';
-  }, 300);
-
-  setTimeout(() => {
-    try {
-      initThree();
-      if (progressVal) progressVal.style.width = '100%';
-      if (statusVal) statusVal.textContent = 'Ready!';
-    } catch (e) {
-      console.error("Three.js initialization failed: ", e);
-      if (statusVal) statusVal.textContent = 'Hardware Acceleration Unavailable. Loading fallback...';
-    }
-  }, 600);
-}
-
-if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', startThreeApp);
-} else {
-  startThreeApp();
-}
+    setTimeout(() => {
+      try {
+        initThree();
+        if (progressVal) progressVal.style.width = '100%';
+        if (statusVal) statusVal.textContent = 'Ready!';
+      } catch (e) {
+        console.error("Three.js initialization failed: ", e);
+        if (statusVal) statusVal.textContent = 'Hardware Acceleration Unavailable. Loading fallback...';
+      }
+    }, 600);
+  });

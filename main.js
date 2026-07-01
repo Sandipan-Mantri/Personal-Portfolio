@@ -1,7 +1,5 @@
 // --- MAIN APPLICATION LOGIC & INTERACTIVE UI ELEMENTS ---
 
-let animationsInitialized = false;
-
 document.addEventListener('DOMContentLoaded', () => {
   // 1. REMOVE PRELOADER ONCE FULLY LOADED
   window.addEventListener('load', () => {
@@ -14,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Trigger GSAP entry animations after preloader fades out
-    initAnimationsAndScroll();
+    initGSAPAnimations();
+    initSkillInteractions();
   });
 
   // Backup in case load event takes too long
@@ -25,7 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         preloader.style.display = 'none';
       }, 800);
-      initAnimationsAndScroll();
+      initGSAPAnimations();
+      initSkillInteractions();
     }
   }, 3000);
 
@@ -35,26 +35,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let posX = 0, posY = 0;
   let mouseX = 0, mouseY = 0;
-  const isTouchDevice = window.matchMedia('(hover: none)').matches || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-  if (cursor && follower && !isTouchDevice) {
+  if (cursor && follower) {
     document.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
 
-      cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+      cursor.style.left = mouseX + 'px';
+      cursor.style.top = mouseY + 'px';
     });
 
     // Follower easing interpolation loop
     gsap.ticker.add(() => {
-      posX += (mouseX - posX) * 0.18;
-      posY += (mouseY - posY) * 0.18;
+      posX += (mouseX - posX) * 0.15;
+      posY += (mouseY - posY) * 0.15;
 
-      follower.style.transform = `translate3d(${posX}px, ${posY}px, 0) translate(-50%, -50%)`;
+      follower.style.left = posX + 'px';
+      follower.style.top = posY + 'px';
     });
 
     // Hover states for links and interactive items
-    const hoverables = document.querySelectorAll('a, button, input, textarea, .skill-card, .skill-badge, .project-card, .strength-tag');
+    const hoverables = document.querySelectorAll('a, button, input, textarea, .skill-card, .project-card, .strength-tag');
     hoverables.forEach(item => {
       item.addEventListener('mouseenter', () => {
         cursor.classList.add('hover');
@@ -65,12 +66,50 @@ document.addEventListener('DOMContentLoaded', () => {
         follower.classList.remove('hover');
       });
     });
-  } else {
-    if (cursor) cursor.style.display = 'none';
-    if (follower) follower.style.display = 'none';
   }
 
-  // 3. SCROLL TRIGGERS AND NAV HIGHLIGHTING MANAGED BY GSAP SCROLLTRIGGER IN INIT
+  // 3. SCROLL PROGRESS & FLOATING NAV SHADING
+  const header = document.getElementById('header');
+  const scrollProgress = document.getElementById('scroll-progress');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('section');
+
+  window.addEventListener('scroll', () => {
+    const currentScroll = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+
+    // Shade nav bar
+    if (header) {
+      if (currentScroll > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    }
+
+    // Scroll progress line
+    if (scrollProgress && maxScroll > 0) {
+      const percentage = (currentScroll / maxScroll) * 100;
+      scrollProgress.style.width = percentage + '%';
+    }
+
+    // Active Navigation Highlighting depending on section position
+    let currentSectionId = 'hero';
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 150; // offset for nav bar height
+      const sectionHeight = section.offsetHeight;
+      if (currentScroll >= sectionTop && currentScroll < sectionTop + sectionHeight) {
+        currentSectionId = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === `#${currentSectionId}`) {
+        link.classList.add('active');
+      }
+    });
+  });
 
   // 4. MOBILE NAVIGATION DRAWER
   const mobileBtn = document.getElementById('mobile-menu-btn');
@@ -99,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    document.querySelectorAll('.nav-link').forEach(link => {
+    navLinks.forEach(link => {
       link.addEventListener('click', () => {
         navMenu.classList.remove('open');
         const icon = mobileBtn.querySelector('i');
@@ -113,149 +152,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 5. 3D CARD TILT EFFECT (VANILLA JS TRANSFORM MAPPING)
   const cards = document.querySelectorAll('[data-tilt]');
-  const hasHover = window.matchMedia('(hover: hover)').matches;
 
-  if (hasHover) {
-    cards.forEach(card => {
-      const cardInner = card.querySelector('.project-inner') || card.querySelector('.hero-image-inner') || card.querySelector('.cert-card');
-      const targetElement = cardInner || card;
-      if (!targetElement) return;
+  cards.forEach(card => {
+    const cardInner = card.querySelector('.project-inner') || card.querySelector('.hero-image-inner') || card.querySelector('.cert-card');
+    const targetElement = cardInner || card;
+    if (!targetElement) return;
 
-      let rect = null;
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-      card.addEventListener('mouseenter', () => {
-        rect = card.getBoundingClientRect();
-      });
+      // Calculate tilt degrees (-10 to 10)
+      const tiltX = ((x / rect.width) - 0.5) * 20;
+      const tiltY = -(((y / rect.height) - 0.5) * 20);
 
-      card.addEventListener('mousemove', (e) => {
-        if (!rect) rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        // Calculate tilt degrees (-10 to 10)
-        const tiltX = ((x / rect.width) - 0.5) * 20;
-        const tiltY = -(((y / rect.height) - 0.5) * 20);
-
-        gsap.to(targetElement, {
-          rotateY: tiltX,
-          rotateX: tiltY,
-          scale: 1.03,
-          boxShadow: `0 15px 40px rgba(0, 242, 254, 0.15)`,
-          duration: 0.3,
-          ease: 'power2.out',
-          overwrite: 'auto'
-        });
-      });
-
-      card.addEventListener('mouseleave', () => {
-        rect = null;
-        gsap.to(targetElement, {
-          rotateY: 0,
-          rotateX: 0,
-          scale: 1,
-          boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.37)`,
-          duration: 0.6,
-          ease: 'power3.out',
-          overwrite: 'auto'
-        });
+      gsap.to(targetElement, {
+        rotateY: tiltX,
+        rotateX: tiltY,
+        scale: 1.03,
+        boxShadow: `0 15px 40px rgba(0, 242, 254, 0.15)`,
+        duration: 0.3,
+        ease: 'power2.out',
+        overwrite: 'auto'
       });
     });
-  }
 
-  // 5.5 HERO AND CERTIFICATE PARALLAX HANDLED BY GSAP SCROLLTRIGGER IN INIT
+    card.addEventListener('mouseleave', () => {
+      gsap.to(targetElement, {
+        rotateY: 0,
+        rotateX: 0,
+        scale: 1,
+        boxShadow: card.classList.contains('glass-card') ? `0 8px 32px 0 rgba(0, 0, 0, 0.37)` : `0 8px 32px 0 rgba(0, 0, 0, 0.37)`,
+        duration: 0.6,
+        ease: 'power3.out',
+        overwrite: 'auto'
+      });
+    });
+  });
 
-  // 6. GSAP & LENIS INTEGRATED SCROLL & TRANSITIONS
-  function initAnimationsAndScroll() {
-    if (animationsInitialized) return;
-    animationsInitialized = true;
+  // 5.5 HERO IMAGE SCROLL PARALLAX & ZOOM
+  window.addEventListener('scroll', () => {
+    const heroImg = document.querySelector('.hero-img');
+    if (heroImg) {
+      const rect = heroImg.parentElement.getBoundingClientRect();
+      const yOffset = window.scrollY;
+      const elementOffset = heroImg.offsetTop;
+      const distance = yOffset - elementOffset;
+
+      if (distance < 800 && distance > -400) {
+        gsap.to(heroImg, {
+          y: distance * 0.3,
+          scale: 1 + (distance * 0.0002),
+          duration: 0.1,
+          overwrite: 'auto'
+        });
+      }
+    }
+
+    // Certificate images parallax
+    document.querySelectorAll('.cert-preview-img').forEach((img, index) => {
+      const rect = img.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        const speed = 0.5 + (index * 0.1);
+        gsap.to(img, {
+          y: (window.scrollY - img.offsetTop) * speed * 0.1,
+          duration: 0.1,
+          overwrite: 'auto'
+        });
+      }
+    });
+  });
+
+  // 6. GSAP SCROLLTRIGGER SCROLL-IN TRANSITIONS
+  function initGSAPAnimations() {
     gsap.registerPlugin(ScrollTrigger);
-
-    // Initialize Lenis Smooth Scroll
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      smoothTouch: true,
-      touchMultiplier: 1.2,
-      infinite: false
-    });
-
-    // Connect Lenis to ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
-
-    gsap.ticker.add((time) => {
-      lenis.raf(time * 1000);
-    });
-
-    // Disable lag smoothing to prevent animation jitter during scroll
-    gsap.ticker.lagSmoothing(0);
-
-    // Refresh on resize to avoid stale scroll dimensions
-    window.addEventListener('resize', () => {
-      ScrollTrigger.refresh();
-    });
-
-    // Handle smooth scroll anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        const targetId = this.getAttribute('href');
-        if (!targetId || targetId === '#') return;
-        const target = document.querySelector(targetId);
-        if (target) {
-          e.preventDefault();
-          lenis.scrollTo(target, {
-            offset: this.classList.contains('logo') ? 0 : -90
-          });
-        }
-      });
-    });
-
-    // Scroll Progress Line
-    const scrollProgress = document.getElementById('scroll-progress');
-    if (scrollProgress) {
-      gsap.to(scrollProgress, {
-        scrollTrigger: {
-          trigger: 'body',
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: true
-        },
-        width: '100%',
-        ease: 'none'
-      });
-    }
-
-    // Shade header on scroll
-    const header = document.getElementById('header');
-    if (header) {
-      ScrollTrigger.create({
-        start: 'top -50',
-        onToggle: (self) => {
-          header.classList.toggle('scrolled', self.isActive);
-        }
-      });
-    }
-
-    // Active Navigation Highlighting depending on section position
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link');
-    sections.forEach(section => {
-      ScrollTrigger.create({
-        trigger: section,
-        start: 'top center',
-        end: 'bottom center',
-        onToggle: (self) => {
-          if (self.isActive) {
-            const id = section.getAttribute('id');
-            navLinks.forEach(link => {
-              link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
-            });
-          }
-        }
-      });
-    });
 
     // Hero Entry animations
     const tlHero = gsap.timeline();
@@ -264,41 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
       .from('.hero-subtitle', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
       .from('.hero-desc', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
       .from('.hero-buttons', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
-      .from('.hero-visual', { scale: 0.5, opacity: 0, duration: 1.2, ease: 'elastic.out(1, 0.5)' }, '-=0.8');
-
-    // Hero Image Scroll Parallax & Zoom
-    const heroImg = document.querySelector('.hero-img');
-    if (heroImg) {
-      gsap.to(heroImg, {
-        scrollTrigger: {
-          trigger: '#hero',
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        },
-        y: 100,
-        scale: 1.15,
-        ease: 'none'
-      });
-    }
-
-    // Certificate preview image parallax animations
-    document.querySelectorAll('.cert-card').forEach((card, index) => {
-      const img = card.querySelector('.cert-preview-img');
-      if (img) {
-        const speed = 0.5 + (index * 0.15);
-        gsap.to(img, {
-          scrollTrigger: {
-            trigger: card,
-            start: 'top bottom',
-            end: 'bottom top',
-            scrub: true
-          },
-          y: 40 * speed,
-          ease: 'none'
-        });
-      }
-    });
+      .from('.hero-visual', { scale: 0.5, opacity: 0, duration: 1.2, ease: 'elastic.out(1, 0.5)' }, '-=0.8')
+      .from('.hero-badge', { y: 30, opacity: 0, duration: 0.8, ease: 'power2.out', stagger: 0.2 }, '-=0.8');
 
     // Section Titles reveal
     document.querySelectorAll('.section-title').forEach(title => {
@@ -337,30 +275,17 @@ document.addEventListener('DOMContentLoaded', () => {
       ease: 'power2.out'
     });
 
-    // Skills Row staggering for table layout
-    gsap.from('.skills-row', {
+    // Skills Card staggering
+    gsap.from('.skills-category', {
       scrollTrigger: {
-        trigger: '.skills-table-wrapper',
+        trigger: '.skills-grid',
         start: 'top 75%'
       },
       opacity: 0,
-      x: -50,
+      y: 50,
       duration: 0.8,
-      stagger: 0.15,
+      stagger: 0.2,
       ease: 'power2.out'
-    });
-
-    // Skill badges animation with stagger
-    gsap.from('.skill-badge', {
-      scrollTrigger: {
-        trigger: '.skills-table-wrapper',
-        start: 'top 75%'
-      },
-      opacity: 0,
-      scale: 0.5,
-      duration: 0.6,
-      stagger: 0.05,
-      ease: 'back.out(1.5)'
     });
 
     // Project grid cards staggering
@@ -452,191 +377,79 @@ document.addEventListener('DOMContentLoaded', () => {
       ease: 'power2.out'
     });
 
-    // 8. SCROLL-WALKING CHARACTER CONTROLLER
-    const character = document.getElementById('walking-character');
-    const innerChar = document.getElementById('walking-character-inner');
-    const speechBubble = document.getElementById('character-speech');
-
-    if (character && innerChar) {
-      let scrollTimeout = null;
-
-      const speechQuotes = [
-        "Hi! I'm Sandipan 👋",
-        "Keep scrolling! 🚀",
-        "Coding is my superpower! 💻",
-        "AI & ML student here! 🧠",
-        "Designing experiences... ✨",
-        "Let's build something epic! 🛠️",
-        "Need a developer? Contact me! 📬"
-      ];
-
-      function randomizeSpeech() {
-        const idx = Math.floor(Math.random() * speechQuotes.length);
-        if (speechBubble) speechBubble.textContent = speechQuotes[idx];
-      }
-
-      character.addEventListener('mouseenter', randomizeSpeech);
-      character.addEventListener('click', () => {
-        randomizeSpeech();
-        gsap.fromTo(character, { scale: 1 }, { scale: 1.2, duration: 0.15, yoyo: true, repeat: 1 });
-      });
-
-      // Move character across the screen
-      gsap.to(character, {
-        scrollTrigger: {
-          trigger: 'body',
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 0.4
-        },
-        x: '84vw',
-        ease: 'none'
-      });
-
-      // Track scroll direction and active walking state
-      ScrollTrigger.create({
-        trigger: 'body',
-        start: 'top top',
-        end: 'bottom bottom',
-        onUpdate: (self) => {
-          // Flip character direction based on scroll direction
-          if (self.direction === 1) {
-            innerChar.style.transform = 'scaleX(1)';
-          } else if (self.direction === -1) {
-            innerChar.style.transform = 'scaleX(-1)';
-          }
-
-          character.classList.add('is-walking');
-
-          clearTimeout(scrollTimeout);
-          scrollTimeout = setTimeout(() => {
-            character.classList.remove('is-walking');
-          }, 150);
-        }
-      });
-    }
+    // Skill badges entrance -- staggered, nice for desktop and mobile
+    gsap.from('.skill-badge', {
+      scrollTrigger: {
+        trigger: '.skills-grid',
+        start: 'top 80%'
+      },
+      opacity: 0,
+      y: 18,
+      scale: 0.98,
+      duration: 0.7,
+      stagger: 0.06,
+      ease: 'back.out(1.2)'
+    });
   }
 });
 
-// 7. CONTACT FORM — FORMSUBMIT.CO HANDLER
-// ═══════════════════════════════════════════════════════════════════
-// Zero setup required. FormSubmit.co routes submissions directly to 
-// mantrisandipan@gmail.com.
-//
-// NOTE: On the VERY FIRST submission, you will receive a confirmation
-// email from FormSubmit.co. Click "Activate Form" in that email once,
-// and all future submissions will land directly in your inbox!
-// ═══════════════════════════════════════════════════════════════════
+// Initialize touch/tap interactions for skill badges
+function initSkillInteractions() {
+  const badges = document.querySelectorAll('.skill-badge');
+  if (!badges || badges.length === 0) return;
 
-const FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/mantrisandipan@gmail.com';
+  // Add tap effects for touch devices and mouse click press effect
+  badges.forEach(b => {
+    // pointerdown covers touch and mouse press
+    b.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      gsap.to(b, { scale: 0.96, duration: 0.12, ease: 'power2.out' });
+    });
 
-async function submitForm() {
-  const form = document.getElementById('contact-form');
-  const name = document.getElementById('name').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const subject = document.getElementById('subject').value.trim();
-  const message = document.getElementById('message').value.trim();
+    // pointerup and pointerleave restore
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(evt => {
+      b.addEventListener(evt, () => {
+        gsap.to(b, { scale: 1, duration: 0.18, ease: 'elastic.out(1, 0.6)' });
+      });
+    });
+
+    // small hover pulse on mouseenter for non-touch
+    b.addEventListener('mouseenter', () => {
+      if (window.matchMedia('(hover: hover)').matches) {
+        gsap.fromTo(b, { y: 0 }, { y: -4, duration: 0.28, yoyo: true, repeat: 1, ease: 'sine.inOut' });
+      }
+    });
+  });
+}
+
+// 7. DUMMY SECURE FORM SUBMIT HANDLER
+function submitForm() {
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const subject = document.getElementById('subject').value;
+  const message = document.getElementById('message').value;
   const formMsg = document.getElementById('form-status');
-  const btn = document.getElementById('submit-btn');
 
   if (!name || !email || !subject || !message) return;
 
-  gsap.killTweensOf(formMsg);
-
-  // Silently discard honeypot spam
-  const botcheck = document.getElementById('botcheck');
-  if (botcheck && botcheck.checked) { form.reset(); return; }
-
-  // ── Local File Protocol (CORS Bypass) ──────────────────────────
-  // If index.html is opened directly as a local file (file://),
-  // AJAX fetch is blocked by CORS. We bypass this by submitting traditionally.
-  if (window.location.protocol === 'file:') {
+  if (formMsg) {
     formMsg.style.display = 'block';
-    formMsg.style.opacity = '1';
-    formMsg.textContent = 'Submitting message via secure browser redirect...';
-    formMsg.className = 'form-status-msg info';
+    formMsg.textContent = `Thank you, ${name}! Your message regarding "${subject}" has been logged locally.`;
+    formMsg.className = 'form-status-msg success';
 
-    form.action = 'https://formsubmit.co/mantrisandipan@gmail.com';
-    form.method = 'POST';
+    // Clear inputs
+    document.getElementById('contact-form').reset();
 
-    // Add config fields dynamically
-    let templateInput = form.querySelector('input[name="_template"]');
-    if (!templateInput) {
-      templateInput = document.createElement('input');
-      templateInput.type = 'hidden';
-      templateInput.name = '_template';
-      templateInput.value = 'box';
-      form.appendChild(templateInput);
-    }
-
-    form.submit();
-    return;
+    // Fade out status message after 5 seconds
+    setTimeout(() => {
+      gsap.to(formMsg, {
+        opacity: 0,
+        duration: 1,
+        onComplete: () => {
+          formMsg.style.display = 'none';
+          formMsg.style.opacity = '1';
+        }
+      });
+    }, 5000);
   }
-
-  // ── Lock UI while sending (For Web Server HTTP/HTTPS) ──────────
-  const originalHTML = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = 'Sending… <i class="fa-solid fa-circle-notch fa-spin" style="color:#030308;margin-left:6px;"></i>';
-  form.querySelectorAll('.form-control').forEach(el => el.disabled = true);
-
-  formMsg.style.display = 'block';
-  formMsg.style.opacity = '1';
-  formMsg.textContent = 'Sending your message…';
-  formMsg.className = 'form-status-msg info';
-
-  // ── POST to FormSubmit.co ──────────────────────────────────────
-  try {
-    const response = await fetch(FORMSUBMIT_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        name: name,
-        email: email,
-        _subject: `Portfolio Contact: ${subject}`,
-        message: message,
-        _template: 'box' // Beautiful boxed template
-      })
-    });
-
-    const result = await response.json();
-
-    if (result.success === 'true' || result.success === true) {
-      formMsg.textContent = `✅ Message sent, ${name}! I'll get back to you soon.`;
-      formMsg.className = 'form-status-msg success';
-      form.reset();
-    } else {
-      // Check if it's the activation email requirement
-      if (result.message && (result.message.toLowerCase().includes('activate') || result.message.toLowerCase().includes('confirm') || result.message.toLowerCase().includes('first'))) {
-        formMsg.textContent = `📩 Check your mail: FormSubmit sent an activation email to mantrisandipan@gmail.com. Please click the link inside it to activate your form!`;
-        formMsg.className = 'form-status-msg info';
-        form.reset();
-      } else {
-        throw new Error(result.message || 'Something went wrong.');
-      }
-    }
-
-  } catch (err) {
-    console.error('Send error:', err);
-    formMsg.textContent = `❌ Failed to send: ${err.message || 'Please check your connection and try again.'}`;
-    formMsg.className = 'form-status-msg error';
-  }
-
-  // ── Restore UI ─────────────────────────────────────────────────
-  btn.disabled = false;
-  btn.innerHTML = originalHTML;
-  form.querySelectorAll('.form-control').forEach(el => el.disabled = false);
-
-  // Auto-fade banner after 10 s
-  setTimeout(() => {
-    gsap.to(formMsg, {
-      opacity: 0, duration: 1,
-      onComplete: () => {
-        formMsg.style.display = 'none';
-        formMsg.style.opacity = '1';
-      }
-    });
-  }, 10000);
 }

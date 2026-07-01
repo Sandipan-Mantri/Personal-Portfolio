@@ -84,6 +84,21 @@
               <div class="hero-image-overlay"></div>
             </div>
           </div>
+          <!-- 3D Interactive Floating Badges -->
+          <div class="hero-badge hero-badge-1">
+            <i class="fa-solid fa-brain text-gradient"></i>
+            <div class="details">
+              <span>Expertise</span>
+              <p>AI & ML</p>
+            </div>
+          </div>
+          <div class="hero-badge hero-badge-2">
+            <i class="fa-solid fa-code text-gradient"></i>
+            <div class="details">
+              <span>Stack</span>
+              <p>Flask & Python</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -145,158 +160,104 @@
 
   <!-- Technical Skills Section -->
   <section id="skills">
-    <!-- Skills Section Animated Background -->
-    <div id="skills-bg-canvas"></div>
-
     <div class="section-container">
       <h2 class="section-title">Technical Skills</h2>
+      <div class="skills-grid">
 
-      <!-- Skills Table-like Layout -->
-      <div class="skills-table-wrapper">
-        <div class="skills-table glass-card">
-
-          <!-- Languages & Query Row -->
-          <div class="skills-row skills-row-1">
-            <div class="skills-row-header">
-              <h3 class="skills-row-title">
-                <i class="fa-solid fa-terminal"></i> Languages & Query
-              </h3>
+        <!-- Category 1: Languages -->
+        <div class="skills-category glass-card">
+          <h3 class="skills-category-title">
+            <i class="fa-solid fa-terminal"></i> Languages & Query
+          </h3>
+          <div class="skills-rows">
+            <div class="skills-row">
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-brands fa-python"></i><span>Python</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-c"></i><span>C Language</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-database"></i><span>SQL</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-brands fa-html5"></i><span>HTML5</span></div>
+              </div>
             </div>
-            <div class="skills-row-content">
+            <div class="skills-row">
               <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-brands fa-python"></i>
-                  <span>Python</span>
-                </div>
+                <div class="skill-badge"><i class="fa-brands fa-css3-alt"></i><span>CSS3</span></div>
               </div>
               <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-c"></i>
-                  <span>C Language</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-database"></i>
-                  <span>SQL</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-brands fa-html5"></i>
-                  <span>HTML5</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-brands fa-css3-alt"></i>
-                  <span>CSS3</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-brands fa-js"></i>
-                  <span>JavaScript</span>
-                </div>
+                <div class="skill-badge"><i class="fa-brands fa-js"></i><span>JavaScript</span></div>
               </div>
             </div>
           </div>
-
-          <!-- Frameworks & Libraries Row -->
-          <div class="skills-row skills-row-2">
-            <div class="skills-row-header">
-              <h3 class="skills-row-title">
-                <i class="fa-solid fa-cubes"></i> Frameworks & Libraries
-              </h3>
-            </div>
-            <div class="skills-row-content">
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-network-wired"></i>
-                  <span>Flask</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-chart-line"></i>
-                  <span>Scikit-learn</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-table"></i>
-                  <span>Pandas</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-calculator"></i>
-                  <span>NumPy</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-brands fa-java"></i>
-                  <span>Java Swing</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-plug"></i>
-                  <span>JDBC</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tools & Platforms Row -->
-          <div class="skills-row skills-row-3">
-            <div class="skills-row-header">
-              <h3 class="skills-row-title">
-                <i class="fa-solid fa-screwdriver-wrench"></i> Tools & Platforms
-              </h3>
-            </div>
-            <div class="skills-row-content">
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-brands fa-git-alt"></i>
-                  <span>Git & GitHub</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-database"></i>
-                  <span>SQLite</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-code"></i>
-                  <span>VS Code</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-wand-magic-sparkles"></i>
-                  <span>AI Prompt Engineering</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-solid fa-cloud-arrow-down"></i>
-                  <span>REST APIs</span>
-                </div>
-              </div>
-              <div class="skill-item">
-                <div class="skill-badge">
-                  <i class="fa-brands fa-figma"></i>
-                  <span>Figma (Basic)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
+
+        <!-- Category 2: Frameworks -->
+        <div class="skills-category glass-card">
+          <h3 class="skills-category-title">
+            <i class="fa-solid fa-cubes"></i> Frameworks & Libraries
+          </h3>
+          <div class="skills-rows">
+            <div class="skills-row">
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-network-wired"></i><span>Flask</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-chart-line"></i><span>Scikit-learn</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-table"></i><span>Pandas</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-calculator"></i><span>NumPy</span></div>
+              </div>
+            </div>
+            <div class="skills-row">
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-brands fa-java"></i><span>Java Swing</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-plug"></i><span>JDBC</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 3: Tools -->
+        <div class="skills-category glass-card">
+          <h3 class="skills-category-title">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Tools & Platforms
+          </h3>
+          <div class="skills-rows">
+            <div class="skills-row">
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-brands fa-git-alt"></i><span>Git & GitHub</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-database"></i><span>SQLite</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-code"></i><span>VS Code</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-wand-magic-sparkles"></i><span>AI Prompt
+                    Engineering</span></div>
+              </div>
+            </div>
+            <div class="skills-row">
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-solid fa-cloud-arrow-down"></i><span>REST APIs</span></div>
+              </div>
+              <div class="skill-item">
+                <div class="skill-badge"><i class="fa-brands fa-figma"></i><span>Figma (Basic)</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -421,7 +382,7 @@
                 clustering, and dimensionality reduction.</li>
             </ul>
             <div style="margin-top: 14px;">
-              <a href="certificate-ml.pdf" target="_blank" class="project-link">
+              <a href="176555479.pdf" target="_blank" class="project-link">
                 <i class="fa-solid fa-file-pdf"></i> View PDF Certificate
               </a>
             </div>
@@ -452,7 +413,7 @@
                 form handling.</li>
             </ul>
             <div style="margin-top: 14px;">
-              <a href="certificate-flask.pdf" target="_blank" class="project-link">
+              <a href="149367839.pdf" target="_blank" class="project-link">
                 <i class="fa-solid fa-file-pdf"></i> View PDF Certificate
               </a>
             </div>
@@ -533,11 +494,11 @@
           </div>
 
           <div class="contact-links-list">
-            <a href="mailto:mantrisandipan@gmail.com" class="contact-link-item">
+            <a href="mailto:mantrisandipan@icloud.com" class="contact-link-item">
               <div class="contact-icon-box"><i class="fa-solid fa-envelope"></i></div>
               <div class="contact-link-details">
                 <span>Email</span>
-                <p>mantrisandipan@gmail.com</p>
+                <p>mantrisandipan@icloud.com</p>
               </div>
             </a>
 
@@ -574,29 +535,28 @@
             <div class="form-group-row">
               <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" class="form-control" placeholder="Your Name" required>
+                <input type="text" id="name" class="form-control" placeholder="Your Name" required>
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required>
+                <input type="email" id="email" class="form-control" placeholder="your@email.com" required>
               </div>
             </div>
             <div class="form-group">
               <label for="subject">Subject</label>
-              <input type="text" id="subject" name="_subject" class="form-control" placeholder="Project Discussion"
-                required>
+              <input type="text" id="subject" class="form-control" placeholder="Project Discussion" required>
             </div>
             <div class="form-group">
               <label for="message">Message</label>
-              <textarea id="message" name="message" class="form-control"
-                placeholder="Hello Sandipan, I'd like to discuss..." required></textarea>
+              <textarea id="message" class="form-control" placeholder="Hello Sandipan, I'd like to discuss..."
+                required></textarea>
             </div>
-            <!-- Spam Protection -->
-            <input type="checkbox" name="botcheck" id="botcheck" class="hidden" style="display: none;">
-            <button type="submit" class="btn btn-primary" id="submit-btn" style="align-self: flex-start;">
+            <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
               Send Message <i class="fa-solid fa-paper-plane" style="color: #030308;"></i>
             </button>
-            <div class="form-status-msg" id="form-status"></div>
+            <div class="form-status-msg success" id="form-status">
+              Message sent successfully! Thank you for reaching out.
+            </div>
           </form>
         </div>
 
@@ -615,73 +575,13 @@
     </div>
   </footer>
 
-  <!-- Scroll-Walking Character -->
-  <div class="scroll-track-container">
-    <div class="scroll-track-line"></div>
-    <div class="walking-character" id="walking-character">
-      <div class="character-speech" id="character-speech">Hi! I'm Sandipan 👋</div>
-      <div class="walking-character-inner" id="walking-character-inner">
-        <svg class="walking-avatar-svg" viewBox="0 0 100 120" width="80" height="96">
-          <!-- Hair back -->
-          <path d="M 35 30 Q 30 20 40 15 Q 50 10 60 15 Q 70 20 65 30 Z" fill="#111" />
-
-          <!-- Right Leg -->
-          <g class="leg right-leg">
-            <path d="M 55 75 L 58 105" stroke="#222" stroke-width="8" stroke-linecap="round" fill="none" />
-            <path d="M 58 105 L 68 105" stroke="#fff" stroke-width="9" stroke-linecap="round" />
-          </g>
-
-          <!-- Left Leg -->
-          <g class="leg left-leg">
-            <path d="M 45 75 L 42 105" stroke="#222" stroke-width="8" stroke-linecap="round" fill="none" />
-            <path d="M 42 105 L 32 105" stroke="#fff" stroke-width="9" stroke-linecap="round" />
-          </g>
-
-          <!-- Torso (Black Shirt) -->
-          <path d="M 35 48 C 35 48 25 75 38 78 L 62 78 C 75 75 65 48 65 48 Z" fill="#18181f" />
-          <path d="M 45 48 L 50 56 L 55 48" stroke="#333" stroke-width="2" fill="none" />
-
-          <!-- Left Arm -->
-          <g class="arm left-arm">
-            <path d="M 35 50 L 28 68" stroke="#18181f" stroke-width="6" stroke-linecap="round" fill="none" />
-            <circle cx="28" cy="70" r="4" fill="#d9a07e" />
-          </g>
-          <!-- Right Arm -->
-          <g class="arm right-arm">
-            <path d="M 65 50 L 72 68" stroke="#18181f" stroke-width="6" stroke-linecap="round" fill="none" />
-            <circle cx="72" cy="70" r="4" fill="#d9a07e" />
-          </g>
-
-          <!-- Head -->
-          <circle cx="50" cy="38" r="14" fill="#d9a07e" />
-
-          <!-- Face features -->
-          <circle cx="45" cy="36" r="1.5" fill="#222" />
-          <circle cx="55" cy="36" r="1.5" fill="#222" />
-          <path d="M 47 43 Q 50 46 53 43" stroke="#222" stroke-width="1.5" stroke-linecap="round" fill="none" />
-
-          <!-- Curly Hair Front -->
-          <circle cx="38" cy="24" r="6" fill="#111" />
-          <circle cx="48" cy="22" r="7" fill="#111" />
-          <circle cx="58" cy="24" r="6" fill="#111" />
-          <circle cx="44" cy="28" r="6" fill="#111" />
-          <circle cx="52" cy="28" r="6" fill="#111" />
-          <circle cx="36" cy="30" r="5" fill="#111" />
-          <circle cx="62" cy="30" r="5" fill="#111" />
-        </svg>
-      </div>
-    </div>
-  </div>
-
   <!-- CDN Script Loading: Three.js & GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.25/dist/lenis.min.js"></script>
 
   <!-- Custom Scripts -->
   <script src="three-bg.js"></script>
-  <script src="skills-animation.js"></script>
   <script src="main.js"></script>
 </body>
 
