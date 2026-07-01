@@ -303,6 +303,19 @@ document.addEventListener('DOMContentLoaded', () => {
         delay: i * 0.04,
         ease: 'power2.out'
       });
+      // stagger badges inside the row after the row slides in
+      gsap.from(row.querySelectorAll('.skill-badge'), {
+        scrollTrigger: {
+          trigger: row,
+          start: 'top 90%'
+        },
+        opacity: 0,
+        y: 10,
+        duration: 0.5,
+        stagger: 0.06,
+        delay: 0.08,
+        ease: 'power2.out'
+      });
     });
 
     // Project grid cards staggering

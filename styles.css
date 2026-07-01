@@ -1274,9 +1274,13 @@ textarea,
 /* Stronger link color for visibility */
 .nav-link,
 .project-link,
-.btn,
-.skill-badge span {
+.btn {
   color: var(--color-text-primary);
+}
+
+/* Skill badge text should be dark on light panels */
+.skill-badge span {
+  color: #07223e !important;
 }
 
 .project-link {
