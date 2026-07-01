@@ -400,6 +400,23 @@ function initSkillInteractions() {
 
   // Add tap effects for touch devices and mouse click press effect
   badges.forEach(b => {
+    // make badges keyboard-focusable and accessible
+    try {
+      b.setAttribute('role', 'button');
+      b.setAttribute('aria-label', b.innerText.trim());
+      b.tabIndex = 0;
+    } catch (e) {
+      // ignore if DOM property not writable
+    }
+
+    // keyboard activation (Enter / Space)
+    b.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        gsap.fromTo(b, { scale: 1 }, { scale: 0.96, duration: 0.06, yoyo: true, repeat: 1, ease: 'power2.out' });
+      }
+    });
+
     // pointerdown covers touch and mouse press
     b.addEventListener('pointerdown', (e) => {
       e.preventDefault();
