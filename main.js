@@ -1,5 +1,7 @@
 // --- MAIN APPLICATION LOGIC & INTERACTIVE UI ELEMENTS ---
 
+let animationsInitialized = false;
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. REMOVE PRELOADER ONCE FULLY LOADED
   window.addEventListener('load', () => {
@@ -33,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let posX = 0, posY = 0;
   let mouseX = 0, mouseY = 0;
-  const isTouchDevice = window.matchMedia('(hover: none)').matches;
+  const isTouchDevice = window.matchMedia('(hover: none)').matches || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   if (cursor && follower && !isTouchDevice) {
     document.addEventListener('mousemove', (e) => {
@@ -45,8 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Follower easing interpolation loop
     gsap.ticker.add(() => {
-      posX += (mouseX - posX) * 0.15;
-      posY += (mouseY - posY) * 0.15;
+      posX += (mouseX - posX) * 0.18;
+      posY += (mouseY - posY) * 0.18;
 
       follower.style.transform = `translate3d(${posX}px, ${posY}px, 0) translate(-50%, -50%)`;
     });
@@ -63,6 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
         follower.classList.remove('hover');
       });
     });
+  } else {
+    if (cursor) cursor.style.display = 'none';
+    if (follower) follower.style.display = 'none';
   }
 
   // 3. SCROLL TRIGGERS AND NAV HIGHLIGHTING MANAGED BY GSAP SCROLLTRIGGER IN INIT
@@ -161,6 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6. GSAP & LENIS INTEGRATED SCROLL & TRANSITIONS
   function initAnimationsAndScroll() {
+    if (animationsInitialized) return;
+    animationsInitialized = true;
     gsap.registerPlugin(ScrollTrigger);
 
     // Initialize Lenis Smooth Scroll
@@ -170,7 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      smoothTouch: false
+      smoothTouch: true,
+      touchMultiplier: 1.2,
+      infinite: false
     });
 
     // Connect Lenis to ScrollTrigger
@@ -183,16 +192,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Disable lag smoothing to prevent animation jitter during scroll
     gsap.ticker.lagSmoothing(0);
 
+    // Refresh on resize to avoid stale scroll dimensions
+    window.addEventListener('resize', () => {
+      ScrollTrigger.refresh();
+    });
+
     // Handle smooth scroll anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
-        e.preventDefault();
         const targetId = this.getAttribute('href');
-        if (targetId === '#') return;
+        if (!targetId || targetId === '#') return;
         const target = document.querySelector(targetId);
         if (target) {
+          e.preventDefault();
           lenis.scrollTo(target, {
-            offset: this.classList.contains('logo') ? 0 : -80 // custom offset for nav bar
+            offset: this.classList.contains('logo') ? 0 : -90
           });
         }
       });
@@ -225,13 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Active Navigation Highlighting depending on section position
-    const sections = document.querySelectorAll('section');
+    const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-link');
     sections.forEach(section => {
       ScrollTrigger.create({
         trigger: section,
-        start: 'top 150px',
-        end: 'bottom 150px',
+        start: 'top center',
+        end: 'bottom center',
         onToggle: (self) => {
           if (self.isActive) {
             const id = section.getAttribute('id');
@@ -507,14 +521,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // 7. CONTACT FORM — FORMSUBMIT.CO HANDLER
 // ═══════════════════════════════════════════════════════════════════
 // Zero setup required. FormSubmit.co routes submissions directly to 
-// mantrisandipan@icloud.com.
+// mantrisandipan@gmail.com.
 //
 // NOTE: On the VERY FIRST submission, you will receive a confirmation
 // email from FormSubmit.co. Click "Activate Form" in that email once,
 // and all future submissions will land directly in your inbox!
 // ═══════════════════════════════════════════════════════════════════
 
-const FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/mantrisandipan@icloud.com';
+const FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/mantrisandipan@gmail.com';
 
 async function submitForm() {
   const form = document.getElementById('contact-form');
@@ -542,7 +556,7 @@ async function submitForm() {
     formMsg.textContent = 'Submitting message via secure browser redirect...';
     formMsg.className = 'form-status-msg info';
 
-    form.action = 'https://formsubmit.co/mantrisandipan@icloud.com';
+    form.action = 'https://formsubmit.co/mantrisandipan@gmail.com';
     form.method = 'POST';
 
     // Add config fields dynamically
@@ -596,7 +610,7 @@ async function submitForm() {
     } else {
       // Check if it's the activation email requirement
       if (result.message && (result.message.toLowerCase().includes('activate') || result.message.toLowerCase().includes('confirm') || result.message.toLowerCase().includes('first'))) {
-        formMsg.textContent = `📩 Check your mail: FormSubmit sent an activation email to mantrisandipan@icloud.com. Please click the link inside it to activate your form!`;
+        formMsg.textContent = `📩 Check your mail: FormSubmit sent an activation email to mantrisandipan@gmail.com. Please click the link inside it to activate your form!`;
         formMsg.className = 'form-status-msg info';
         form.reset();
       } else {

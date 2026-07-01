@@ -8,8 +8,15 @@ let cachedScrollHeight = 0;
 let cachedWindowHeight = 0;
 const lookAtTarget = { x: 0, y: 0, z: 0 }; // Pre-allocated to avoid GC pressure
 
-const windowHalfX = window.innerWidth / 2;
-const windowHalfY = window.innerHeight / 2;
+let windowHalfX = window.innerWidth / 2;
+let windowHalfY = window.innerHeight / 2;
+const isMobileDevice = window.matchMedia('(pointer: coarse), (max-width: 1024px)').matches || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const desiredPixelRatio = Math.min(window.devicePixelRatio || 1, isMobileDevice ? 1 : 1.5);
+
+function updateWindowDimensions() {
+  windowHalfX = window.innerWidth / 2;
+  windowHalfY = window.innerHeight / 2;
+}
 
 // Generate glowing circular texture for particles using HTML5 canvas (no external image needed)
 function createParticleTexture() {
@@ -43,7 +50,7 @@ function initThree() {
   camera.position.z = 150;
 
   // Particles Geometry
-  const particleCount = 1200;
+  const particleCount = isMobileDevice ? 650 : 1200;
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
@@ -111,13 +118,15 @@ function initThree() {
     alpha: true,
     powerPreference: 'high-performance'
   });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setPixelRatio(desiredPixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(scene.fog.color, 1);
   container.appendChild(renderer.domElement);
 
   // Event Listeners
-  document.addEventListener('mousemove', onDocumentMouseMove);
+  if (!isMobileDevice) {
+    document.addEventListener('mousemove', onDocumentMouseMove);
+  }
   window.addEventListener('resize', onWindowResize);
 
   // Initial caching of heights and scroll listener setup
@@ -144,10 +153,12 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
+  updateWindowDimensions();
   updateScrollDimensions();
 }
 
 function onDocumentMouseMove(event) {
+  if (isMobileDevice) return;
   // Normalize coordinates (-1 to 1)
   mouseX = (event.clientX - windowHalfX) / 100;
   mouseY = (event.clientY - windowHalfY) / 100;
@@ -164,24 +175,13 @@ function animate() {
   // Enhanced rotation + mouse interaction with wobble effect
   if (particleSystem) {
     const time = Date.now();
-    particleSystem.rotation.y = time * 0.0001 + (targetX * 0.15);
-    particleSystem.rotation.x = time * 0.00006 + (targetY * 0.15);
-    particleSystem.rotation.z = Math.sin(time * 0.00003) * 0.3;
+    particleSystem.rotation.y = time * (isMobileDevice ? 0.00006 : 0.0001) + (targetX * 0.12);
+    particleSystem.rotation.x = time * (isMobileDevice ? 0.00004 : 0.00006) + (targetY * 0.12);
+    particleSystem.rotation.z = Math.sin(time * (isMobileDevice ? 0.00002 : 0.00003)) * 0.2;
 
     // Scale pulse effect based on time
-    const scale = 1 + Math.sin(time * 0.0005) * 0.08;
+    const scale = 1 + Math.sin(time * (isMobileDevice ? 0.00045 : 0.0005)) * 0.06;
     particleSystem.scale.set(scale, scale, scale);
-  }
-
-  // Transition camera depth and tilt depending on scroll
-  if (camera) {
-    const sinScroll = Math.sin(scrollPercent * Math.PI);
-    camera.position.z = 130 + sinScroll * 60;
-    camera.position.y = -scrollPercent * 80;
-    camera.position.x = sinScroll * 30;
-    lookAtTarget.x = sinScroll * 20;
-    lookAtTarget.y = -scrollPercent * 50;
-    camera.lookAt(lookAtTarget.x, lookAtTarget.y, lookAtTarget.z);
   }
 
   if (renderer && scene && camera) {
@@ -191,11 +191,16 @@ function animate() {
 
 // Setup progress loader and init
 function startThreeApp() {
-  // Update progress bar during loading
   const progressVal = document.getElementById('loader-progress');
   const statusVal = document.getElementById('loader-status');
 
   if (progressVal) progressVal.style.width = '40%';
+
+  if (isMobileDevice) {
+    if (statusVal) statusVal.textContent = 'Mobile device detected. Optimizing background...';
+    if (progressVal) progressVal.style.width = '100%';
+    return;
+  }
 
   setTimeout(() => {
     if (progressVal) progressVal.style.width = '75%';
