@@ -288,6 +288,23 @@ document.addEventListener('DOMContentLoaded', () => {
       ease: 'power2.out'
     });
 
+    // Each skills row (the white inner panels) slide in with alternating directions
+    const skillRows = gsap.utils.toArray('.skills-row');
+    skillRows.forEach((row, i) => {
+      gsap.from(row, {
+        scrollTrigger: {
+          trigger: row,
+          start: 'top 90%'
+        },
+        opacity: 0,
+        y: 18,
+        x: (i % 2 === 0) ? -30 : 30,
+        duration: 0.7,
+        delay: i * 0.04,
+        ease: 'power2.out'
+      });
+    });
+
     // Project grid cards staggering
     gsap.from('.project-card', {
       scrollTrigger: {
@@ -442,7 +459,7 @@ function initSkillInteractions() {
         gsap.to(b, { y: 0, scale: 1, duration: 0.28, ease: 'elastic.out(1, 0.6)' });
       }
     });
-    
+
     // ensure pointerenter works for touch+mouse hybrid devices
     b.addEventListener('pointerenter', () => {
       if (window.matchMedia('(hover: hover)').matches) return;

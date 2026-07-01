@@ -18,6 +18,14 @@
   --accent-cyan: #00f2fe;
   --accent-purple: #9d4edd;
   --accent-gradient: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
+  /* Classic palette override for skills: navy + gold */
+  --classic-navy: #0b2140;
+  --classic-gold: #c59a3c;
+  --accent-cyan: #1177bb;
+  /* navy-blue accent */
+  --accent-purple: #c59a3c;
+  /* warm-gold */
+  --accent-gradient: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-purple) 100%);
 
   --border-light: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(0, 242, 254, 0.4);
@@ -728,6 +736,12 @@ header.scrolled {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 26px;
+  min-height: 360px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(6, 7, 12, 0.7), rgba(10, 12, 18, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  box-shadow: 0 12px 40px rgba(2, 6, 12, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 .skills-category-title {
@@ -740,6 +754,12 @@ header.scrolled {
 
 .skills-category-title i {
   color: var(--accent-cyan);
+  font-size: 1.25rem;
+}
+
+.skills-category-title {
+  color: #e6eef6;
+  font-weight: 700;
 }
 
 .skills-list {
@@ -865,7 +885,7 @@ header.scrolled {
 }
 
 .skills-category {
-  padding: 14px;
+  /* padding moved to top-level definition */
 }
 
 .skill-item {
@@ -890,12 +910,17 @@ header.scrolled {
 
 .skill-badge i {
   color: var(--accent-cyan);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 
 .skill-badge:hover {
   transform: translateY(-6px) scale(1.03);
   box-shadow: 0 14px 40px rgba(11, 37, 69, 0.12);
+}
+
+.skill-badge:hover i {
+  color: var(--accent-purple);
+  filter: drop-shadow(0 6px 14px rgba(197, 154, 60, 0.12));
 }
 
 /* subtle appear animation; GSAP will override for advanced control */
