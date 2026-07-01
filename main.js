@@ -103,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // 3D character scroll movement is handled by character-3d.js
+
     navLinks.forEach(link => {
       link.classList.remove('active');
       if (link.getAttribute('href') === `#${currentSectionId}`) {
@@ -111,7 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 4. MOBILE NAVIGATION DRAWER
+  // 4. RUNNER POPUP INTERACTION — now handled by character-3d.js
+
+  // 5. MOBILE NAVIGATION DRAWER
   const mobileBtn = document.getElementById('mobile-menu-btn');
   const navMenu = document.getElementById('nav-menu');
 
@@ -237,6 +241,24 @@ document.addEventListener('DOMContentLoaded', () => {
       .from('.hero-buttons', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
       .from('.hero-visual', { scale: 0.5, opacity: 0, duration: 1.2, ease: 'elastic.out(1, 0.5)' }, '-=0.8')
       .from('.hero-badge', { y: 30, opacity: 0, duration: 0.8, ease: 'power2.out', stagger: 0.2 }, '-=0.8');
+
+    if (document.querySelector('.scroll-character')) {
+      gsap.from('.scroll-character', {
+        y: 120,
+        opacity: 0,
+        duration: 1.1,
+        ease: 'elastic.out(1, 0.6)',
+        delay: 0.6
+      });
+      gsap.to('.scroll-character', {
+        y: '+=8',
+        repeat: -1,
+        yoyo: true,
+        duration: 2.4,
+        ease: 'sine.inOut',
+        delay: 1.8
+      });
+    }
 
     // Section Titles reveal
     document.querySelectorAll('.section-title').forEach(title => {
@@ -484,34 +506,77 @@ function initSkillInteractions() {
   });
 }
 
-// 7. DUMMY SECURE FORM SUBMIT HANDLER
+// CONTACT CONFIGURATION
+const CONTACT_CONFIG = {
+  email: "mantrisandipan@icloud.com",
+  whatsappPhone: "917797711005",
+  // TO ENABLE SILENT BACKGROUND WHATSAPP MESSAGES:
+  // 1. Add +34 644 66 21 54 (CallMeBot) to your phone contacts.
+  // 2. Send "I allow callmebot to send me messages" on WhatsApp.
+  // 3. You will receive an API Key. Put it below:
+  callmebotApiKey: ""
+};
+
+// 7. SECURE FORM SUBMIT HANDLER (Email via FormSubmit & Silent WhatsApp via CallMeBot)
 function submitForm() {
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const subject = document.getElementById('subject').value;
-  const message = document.getElementById('message').value;
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const message = document.getElementById('message').value.trim();
   const formMsg = document.getElementById('form-status');
+  const form = document.getElementById('contact-form');
+  const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
 
-  if (!name || !email || !subject || !message) return;
+  if (!name || !email || !phone || !message) return;
 
-  if (formMsg) {
-    formMsg.style.display = 'block';
-    formMsg.textContent = `Thank you, ${name}! Your message regarding "${subject}" has been logged locally.`;
-    formMsg.className = 'form-status-msg success';
-
-    // Clear inputs
-    document.getElementById('contact-form').reset();
-
-    // Fade out status message after 5 seconds
-    setTimeout(() => {
-      gsap.to(formMsg, {
-        opacity: 0,
-        duration: 1,
-        onComplete: () => {
-          formMsg.style.display = 'none';
-          formMsg.style.opacity = '1';
-        }
-      });
-    }, 5000);
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `Sending... <i class="fa-solid fa-spinner fa-spin" style="color: #030308;"></i>`;
   }
+
+  const formData = new FormData(form);
+  formData.set('_replyto', email);
+  formData.set('_subject', `New Portfolio Message from ${name}`);
+
+  fetch(`https://formsubmit.co/ajax/${CONTACT_CONFIG.email}`, {
+    method: "POST",
+    body: formData
+  })
+    .then(response => response.json())
+    .then(() => {
+      const waText = `Hello Sandipan,\n\nNew Portfolio message:\n👤 *Name:* ${name}\n📧 *Email:* ${email}\n📱 *Phone:* ${phone}\n💬 *Message:* ${message}`;
+      const callmebotUrl = `https://api.callmebot.com/whatsapp.php?phone=${CONTACT_CONFIG.whatsappPhone}&text=${encodeURIComponent(waText)}${CONTACT_CONFIG.callmebotApiKey ? `&apikey=${CONTACT_CONFIG.callmebotApiKey}` : ''}`;
+
+      fetch(callmebotUrl, { mode: 'no-cors' })
+        .catch(() => {
+          window.open(`https://wa.me/${CONTACT_CONFIG.whatsappPhone}?text=${encodeURIComponent(waText)}`, "_blank");
+        });
+
+      if (formMsg) {
+        formMsg.style.display = 'block';
+        formMsg.textContent = `Success! Message sent to email and WhatsApp.`;
+        formMsg.className = 'form-status-msg success';
+        formMsg.style.opacity = '1';
+      }
+
+      if (form) form.reset();
+    })
+    .catch(err => {
+      console.error("AJAX form submission failed: ", err);
+      if (formMsg) {
+        formMsg.style.display = 'block';
+        formMsg.textContent = `Oops! Email delivery failed. Opening WhatsApp chat...`;
+        formMsg.className = 'form-status-msg error';
+        formMsg.style.opacity = '1';
+      }
+
+      const waText = `Hello Sandipan,\n\nNew Portfolio message:\n👤 *Name:* ${name}\n📧 *Email:* ${email}\n📱 *Phone:* ${phone}\n💬 *Message:* ${message}`;
+      window.open(`https://wa.me/${CONTACT_CONFIG.whatsappPhone}?text=${encodeURIComponent(waText)}`, "_blank");
+    })
+    .finally(() => {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `Send Message <i class="fa-solid fa-paper-plane" style="color: #030308;"></i>`;
+      }
+    });
 }

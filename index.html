@@ -27,6 +27,22 @@
   <!-- 3D Particle Background WebGL canvas -->
   <div id="canvas-container"></div>
 
+  <!-- Scroll-linked 3D Character -->
+  <div class="scroll-character" id="scroll-character" role="button" tabindex="0" aria-label="3D character guide"
+    aria-expanded="false">
+    <canvas id="character-canvas"></canvas>
+    <div class="runner-popup" id="runner-popup" role="dialog" aria-label="Character info">
+      <div class="runner-popup-inner">
+        <strong>🧑‍💻 Mini-Me</strong>
+        <div class="runner-popup-tags">
+          <span>🧍 I am mini Sandian</span>
+          <span>🚶 Welcome</span>
+          <span>🏃 I am your guide</span>
+          <span>👋 Wave</span>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Preloader Screen -->
   <div id="preloader">
     <div class="loader-logo">SANDIPAN MANTRI<span></span></div>
@@ -382,15 +398,12 @@
                 clustering, and dimensionality reduction.</li>
             </ul>
             <div style="margin-top: 14px;">
-              <a href="176555479.pdf" target="_blank" class="project-link">
+              <a href="certificate-ml.pdf" target="_blank" class="project-link">
                 <i class="fa-solid fa-file-pdf"></i> View PDF Certificate
               </a>
             </div>
           </div>
-          <div class="cert-preview-img-wrap" onclick="window.open('certificate-ml.pdf', '_blank')">
-            <img src="cert-ml.png" alt="Machine Learning Certificate Preview" class="cert-preview-img">
-            <div class="cert-preview-overlay"><i class="fa-solid fa-expand"></i></div>
-          </div>
+
         </div>
 
         <!-- Cert 2 -->
@@ -413,72 +426,66 @@
                 form handling.</li>
             </ul>
             <div style="margin-top: 14px;">
-              <a href="149367839.pdf" target="_blank" class="project-link">
+              <a href="certificate-flask.pdf" target="_blank" class="project-link">
                 <i class="fa-solid fa-file-pdf"></i> View PDF Certificate
               </a>
             </div>
           </div>
-          <div class="cert-preview-img-wrap" onclick="window.open('certificate-flask.pdf', '_blank')">
-            <img src="cert-flask.png" alt="Flask Certificate Preview" class="cert-preview-img">
-            <div class="cert-preview-overlay"><i class="fa-solid fa-expand"></i></div>
-          </div>
         </div>
 
+        <div class="strengths-languages-grid">
+
+          <!-- Key Strengths -->
+          <div class="strengths-wrap">
+            <h3><i class="fa-solid fa-bolt"></i> Key Strengths</h3>
+            <div class="strengths-grid-tags">
+              <div class="strength-tag"><i class="fa-solid fa-lightbulb"></i> Problem Solving</div>
+              <div class="strength-tag"><i class="fa-solid fa-bolt-lightning"></i> Fast Learner</div>
+              <div class="strength-tag"><i class="fa-solid fa-robot"></i> AI Prompt Engineering</div>
+              <div class="strength-tag"><i class="fa-solid fa-users"></i> Team Collaboration</div>
+              <div class="strength-tag"><i class="fa-solid fa-fire-flame-curved"></i> Self-Motivated</div>
+              <div class="strength-tag"><i class="fa-solid fa-eye"></i> Attention to Detail</div>
+              <div class="strength-tag"><i class="fa-solid fa-briefcase"></i> Project Ownership</div>
+              <div class="strength-tag"><i class="fa-solid fa-comments"></i> Communication</div>
+            </div>
+          </div>
+
+          <!-- Languages -->
+          <div class="languages-wrap glass-card">
+            <h3><i class="fa-solid fa-language"></i> Languages</h3>
+            <div class="languages-list">
+              <div class="lang-item">
+                <div class="lang-name-wrap">
+                  <span class="lang-name">Bengali</span>
+                  <span class="lang-prof">Native</span>
+                </div>
+                <div class="lang-bar-bg">
+                  <div class="lang-bar-fill" style="width: 100%;"></div>
+                </div>
+              </div>
+              <div class="lang-item">
+                <div class="lang-name-wrap">
+                  <span class="lang-name">Hindi</span>
+                  <span class="lang-prof">Fluent</span>
+                </div>
+                <div class="lang-bar-bg">
+                  <div class="lang-bar-fill" style="width: 85%;"></div>
+                </div>
+              </div>
+              <div class="lang-item">
+                <div class="lang-name-wrap">
+                  <span class="lang-name">English</span>
+                  <span class="lang-prof">Professional Working Proficiency</span>
+                </div>
+                <div class="lang-bar-bg">
+                  <div class="lang-bar-fill" style="width: 80%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-
-      <div class="strengths-languages-grid">
-
-        <!-- Key Strengths -->
-        <div class="strengths-wrap">
-          <h3><i class="fa-solid fa-bolt"></i> Key Strengths</h3>
-          <div class="strengths-grid-tags">
-            <div class="strength-tag"><i class="fa-solid fa-lightbulb"></i> Problem Solving</div>
-            <div class="strength-tag"><i class="fa-solid fa-bolt-lightning"></i> Fast Learner</div>
-            <div class="strength-tag"><i class="fa-solid fa-robot"></i> AI Prompt Engineering</div>
-            <div class="strength-tag"><i class="fa-solid fa-users"></i> Team Collaboration</div>
-            <div class="strength-tag"><i class="fa-solid fa-fire-flame-curved"></i> Self-Motivated</div>
-            <div class="strength-tag"><i class="fa-solid fa-eye"></i> Attention to Detail</div>
-            <div class="strength-tag"><i class="fa-solid fa-briefcase"></i> Project Ownership</div>
-            <div class="strength-tag"><i class="fa-solid fa-comments"></i> Communication</div>
-          </div>
-        </div>
-
-        <!-- Languages -->
-        <div class="languages-wrap glass-card">
-          <h3><i class="fa-solid fa-language"></i> Languages</h3>
-          <div class="languages-list">
-            <div class="lang-item">
-              <div class="lang-name-wrap">
-                <span class="lang-name">Bengali</span>
-                <span class="lang-prof">Native</span>
-              </div>
-              <div class="lang-bar-bg">
-                <div class="lang-bar-fill" style="width: 100%;"></div>
-              </div>
-            </div>
-            <div class="lang-item">
-              <div class="lang-name-wrap">
-                <span class="lang-name">Hindi</span>
-                <span class="lang-prof">Fluent</span>
-              </div>
-              <div class="lang-bar-bg">
-                <div class="lang-bar-fill" style="width: 85%;"></div>
-              </div>
-            </div>
-            <div class="lang-item">
-              <div class="lang-name-wrap">
-                <span class="lang-name">English</span>
-                <span class="lang-prof">Professional Working Proficiency</span>
-              </div>
-              <div class="lang-bar-bg">
-                <div class="lang-bar-fill" style="width: 80%;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
   </section>
 
   <!-- Contact Section -->
@@ -531,25 +538,29 @@
         </div>
 
         <div class="contact-form-wrap glass-card">
-          <form class="contact-form" id="contact-form" onsubmit="event.preventDefault(); submitForm();">
+          <form class="contact-form" id="contact-form" action="https://formsubmit.co/mantrisandipan@icloud.com"
+            method="POST" onsubmit="event.preventDefault(); submitForm();">
+            <input type="hidden" name="_captcha" value="false">
             <div class="form-group-row">
               <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" class="form-control" placeholder="Your Name" required>
+                <input type="text" id="name" name="name" class="form-control" placeholder="Your Name" required>
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" class="form-control" placeholder="your@email.com" required>
+                <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required>
+              </div>
+            </div>
+            <div class="form-group-row">
+              <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone" class="form-control" placeholder="Your Phone Number" required>
               </div>
             </div>
             <div class="form-group">
-              <label for="subject">Subject</label>
-              <input type="text" id="subject" class="form-control" placeholder="Project Discussion" required>
-            </div>
-            <div class="form-group">
               <label for="message">Message</label>
-              <textarea id="message" class="form-control" placeholder="Hello Sandipan, I'd like to discuss..."
-                required></textarea>
+              <textarea id="message" name="message" class="form-control"
+                placeholder="Hello Sandipan, I'd like to discuss..." required></textarea>
             </div>
             <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
               Send Message <i class="fa-solid fa-paper-plane" style="color: #030308;"></i>
@@ -582,6 +593,7 @@
 
   <!-- Custom Scripts -->
   <script src="three-bg.js"></script>
+  <script src="character-3d.js"></script>
   <script src="main.js"></script>
 </body>
 
