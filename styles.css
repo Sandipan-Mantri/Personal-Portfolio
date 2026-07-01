@@ -1232,6 +1232,63 @@ header.scrolled {
   transform: scale(1);
 }
 
+/* Make all clickable elements clearly visible and keyboard-focusable */
+a,
+button,
+input,
+textarea,
+.btn,
+.project-link,
+.skill-badge,
+.cert-preview-img-wrap,
+.mobile-menu-btn {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+/* Stronger link color for visibility */
+.nav-link,
+.project-link,
+.btn,
+.skill-badge span {
+  color: var(--color-text-primary);
+}
+
+.project-link {
+  color: var(--accent-cyan);
+}
+
+/* Focus styles for keyboard users */
+.skill-badge:focus,
+.btn:focus,
+.project-link:focus,
+a:focus,
+.mobile-menu-btn:focus,
+.cert-preview-img-wrap:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 242, 254, 0.14), 0 6px 20px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+  z-index: 6;
+}
+
+/* Improve contrast on hover */
+.skill-badge:hover,
+.btn:hover,
+.project-link:hover,
+.cert-preview-img-wrap:hover {
+  filter: brightness(1.05);
+  transform: translateY(-6px) scale(1.02);
+}
+
+/* Ensure top-level containers are above canvas */
+header,
+.section-container,
+footer {
+  position: relative;
+  z-index: 1001;
+}
+
+
 /* Force visibility for sections that may be left hidden by JS animations */
 .skills-category,
 .skill-badge,
