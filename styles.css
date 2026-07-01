@@ -1223,6 +1223,23 @@ header.scrolled {
   transform: scale(1);
 }
 
+/* Force visibility for sections that may be left hidden by JS animations */
+.skills-category,
+.skill-badge,
+.project-card,
+.cert-card {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+}
+
+/* Ensure skill rows render above any canvas overlays */
+.skills-grid,
+.skills-category {
+  position: relative;
+  z-index: 2;
+}
+
 .cert-bullets li {
   font-size: 0.95rem;
   color: var(--color-text-muted);
