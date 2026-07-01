@@ -191,6 +191,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Add hover/tilt animations for certificate cards (similar to projects)
+  document.querySelectorAll('.cert-card').forEach(card => {
+    const preview = card.querySelector('.cert-preview-img-wrap');
+    card.addEventListener('mouseenter', () => {
+      gsap.to(card, { scale: 1.02, duration: 0.28, ease: 'power2.out' });
+      if (preview) gsap.to(preview, { scale: 1.04, duration: 0.5, ease: 'power3.out' });
+    });
+    card.addEventListener('mouseleave', () => {
+      gsap.to(card, { scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.7)' });
+      if (preview) gsap.to(preview, { scale: 1, duration: 0.6, ease: 'power3.out' });
+    });
+  });
+
   // 5.5 HERO IMAGE SCROLL PARALLAX & ZOOM
   window.addEventListener('scroll', () => {
     const heroImg = document.querySelector('.hero-img');
