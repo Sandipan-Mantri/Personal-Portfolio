@@ -433,8 +433,23 @@ function initSkillInteractions() {
     // small hover pulse on mouseenter for non-touch
     b.addEventListener('mouseenter', () => {
       if (window.matchMedia('(hover: hover)').matches) {
-        gsap.fromTo(b, { y: 0 }, { y: -4, duration: 0.28, yoyo: true, repeat: 1, ease: 'sine.inOut' });
+        gsap.to(b, { y: -6, scale: 1.03, duration: 0.18, ease: 'power1.out' });
       }
+    });
+
+    b.addEventListener('mouseleave', () => {
+      if (window.matchMedia('(hover: hover)').matches) {
+        gsap.to(b, { y: 0, scale: 1, duration: 0.28, ease: 'elastic.out(1, 0.6)' });
+      }
+    });
+    
+    // ensure pointerenter works for touch+mouse hybrid devices
+    b.addEventListener('pointerenter', () => {
+      if (window.matchMedia('(hover: hover)').matches) return;
+      gsap.to(b, { scale: 1.02, duration: 0.12, ease: 'power1.out' });
+    });
+    b.addEventListener('pointerleave', () => {
+      gsap.to(b, { scale: 1, duration: 0.12, ease: 'power1.out' });
     });
   });
 }
