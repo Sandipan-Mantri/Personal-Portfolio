@@ -6,12 +6,18 @@ let targetX = 0, targetY = 0;
 let scrollPercent = 0;
 let cachedScrollHeight = 0;
 let cachedWindowHeight = 0;
+let animationFrameId = null;
 const lookAtTarget = { x: 0, y: 0, z: 0 }; // Pre-allocated to avoid GC pressure
 
 let windowHalfX = window.innerWidth / 2;
 let windowHalfY = window.innerHeight / 2;
 const isMobileDevice = window.matchMedia('(pointer: coarse), (max-width: 1024px)').matches || /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-const desiredPixelRatio = Math.min(window.devicePixelRatio || 1, isMobileDevice ? 1 : 1.5);
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+const isSlowNetwork = connection && /2g|slow-2g/.test(connection.effectiveType || '');
+const lowDeviceMemory = navigator.deviceMemory && navigator.deviceMemory <= 2;
+const isPerformanceConstrained = isMobileDevice || prefersReducedMotion || isSlowNetwork || lowDeviceMemory;
+const desiredPixelRatio = Math.min(window.devicePixelRatio || 1, isPerformanceConstrained ? 1 : 1.5);
 
 function updateWindowDimensions() {
   windowHalfX = window.innerWidth / 2;
@@ -124,7 +130,7 @@ function initThree() {
   container.appendChild(renderer.domElement);
 
   // Event Listeners
-  if (!isMobileDevice) {
+  if (!isPerformanceConstrained) {
     document.addEventListener('mousemove', onDocumentMouseMove);
   }
   window.addEventListener('resize', onWindowResize);
@@ -133,8 +139,22 @@ function initThree() {
   updateScrollDimensions();
   window.addEventListener('scroll', onDocumentScroll, { passive: true });
 
-  // Start animation loop
-  animate();
+  // Pause render when tab is hidden and restart when visible
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    } else if (!animationFrameId) {
+      animate();
+    }
+  });
+
+  // Start animation loop only if the page is visible
+  if (!document.hidden) {
+    animate();
+  }
 }
 
 function updateScrollDimensions() {
@@ -166,7 +186,7 @@ function onDocumentMouseMove(event) {
 
 // Animation loop
 function animate() {
-  requestAnimationFrame(animate);
+  animationFrameId = requestAnimationFrame(animate);
 
   // Smooth mouse interpolation (easing)
   targetX += (mouseX - targetX) * 0.08;
@@ -175,12 +195,17 @@ function animate() {
   // Enhanced rotation + mouse interaction with wobble effect
   if (particleSystem) {
     const time = Date.now();
-    particleSystem.rotation.y = time * (isMobileDevice ? 0.00006 : 0.0001) + (targetX * 0.12);
-    particleSystem.rotation.x = time * (isMobileDevice ? 0.00004 : 0.00006) + (targetY * 0.12);
-    particleSystem.rotation.z = Math.sin(time * (isMobileDevice ? 0.00002 : 0.00003)) * 0.2;
+    const rotationSpeed = isPerformanceConstrained ? 0.00004 : 0.0001;
+    const rotationSpeedAlt = isPerformanceConstrained ? 0.00002 : 0.00006;
+    const wobbleSpeed = isPerformanceConstrained ? 0.00001 : 0.00003;
+    const pulseSpeed = isPerformanceConstrained ? 0.00035 : 0.0005;
+
+    particleSystem.rotation.y = time * rotationSpeed + (targetX * 0.12);
+    particleSystem.rotation.x = time * rotationSpeedAlt + (targetY * 0.12);
+    particleSystem.rotation.z = Math.sin(time * wobbleSpeed) * 0.2;
 
     // Scale pulse effect based on time
-    const scale = 1 + Math.sin(time * (isMobileDevice ? 0.00045 : 0.0005)) * 0.06;
+    const scale = 1 + Math.sin(time * pulseSpeed) * 0.04;
     particleSystem.scale.set(scale, scale, scale);
   }
 
