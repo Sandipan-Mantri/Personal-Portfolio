@@ -3,6 +3,10 @@
 let scene, camera, renderer, particleSystem;
 let mouseX = 0, mouseY = 0;
 let targetX = 0, targetY = 0;
+let scrollPercent = 0;
+let cachedScrollHeight = 0;
+let cachedWindowHeight = 0;
+const lookAtTarget = { x: 0, y: 0, z: 0 }; // Pre-allocated to avoid GC pressure
 
 const windowHalfX = window.innerWidth / 2;
 const windowHalfY = window.innerHeight / 2;
@@ -39,7 +43,7 @@ function initThree() {
   camera.position.z = 150;
 
   // Particles Geometry
-  const particleCount = 2500;
+  const particleCount = 1200;
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
@@ -102,8 +106,12 @@ function initThree() {
   scene.add(particleSystem);
 
   // WebGL Renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer = new THREE.WebGLRenderer({
+    antialias: false,
+    alpha: true,
+    powerPreference: 'high-performance'
+  });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setClearColor(scene.fog.color, 1);
   container.appendChild(renderer.domElement);
@@ -112,8 +120,22 @@ function initThree() {
   document.addEventListener('mousemove', onDocumentMouseMove);
   window.addEventListener('resize', onWindowResize);
 
+  // Initial caching of heights and scroll listener setup
+  updateScrollDimensions();
+  window.addEventListener('scroll', onDocumentScroll, { passive: true });
+
   // Start animation loop
   animate();
+}
+
+function updateScrollDimensions() {
+  cachedScrollHeight = document.documentElement.scrollHeight;
+  cachedWindowHeight = window.innerHeight;
+  scrollPercent = window.scrollY / (cachedScrollHeight - cachedWindowHeight || 1);
+}
+
+function onDocumentScroll() {
+  scrollPercent = window.scrollY / (cachedScrollHeight - cachedWindowHeight || 1);
 }
 
 function onWindowResize() {
@@ -122,6 +144,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   }
+  updateScrollDimensions();
 }
 
 function onDocumentMouseMove(event) {
@@ -150,15 +173,15 @@ function animate() {
     particleSystem.scale.set(scale, scale, scale);
   }
 
-  // Scroll responsive camera motion with enhanced depth
-  const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight || 1);
-
   // Transition camera depth and tilt depending on scroll
   if (camera) {
-    camera.position.z = 130 + Math.sin(scrollPercent * Math.PI) * 60;
+    const sinScroll = Math.sin(scrollPercent * Math.PI);
+    camera.position.z = 130 + sinScroll * 60;
     camera.position.y = -scrollPercent * 80;
-    camera.position.x = Math.sin(scrollPercent * Math.PI) * 30;
-    camera.lookAt(new THREE.Vector3(Math.sin(scrollPercent * Math.PI) * 20, -scrollPercent * 50, 0));
+    camera.position.x = sinScroll * 30;
+    lookAtTarget.x = sinScroll * 20;
+    lookAtTarget.y = -scrollPercent * 50;
+    camera.lookAt(lookAtTarget.x, lookAtTarget.y, lookAtTarget.z);
   }
 
   if (renderer && scene && camera) {

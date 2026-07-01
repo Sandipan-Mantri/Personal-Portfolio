@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Trigger GSAP entry animations after preloader fades out
-    initGSAPAnimations();
+    initAnimationsAndScroll();
   });
 
   // Backup in case load event takes too long
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         preloader.style.display = 'none';
       }, 800);
-      initGSAPAnimations();
+      initAnimationsAndScroll();
     }
   }, 3000);
 
@@ -33,14 +33,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let posX = 0, posY = 0;
   let mouseX = 0, mouseY = 0;
+  const isTouchDevice = window.matchMedia('(hover: none)').matches;
 
-  if (cursor && follower) {
+  if (cursor && follower && !isTouchDevice) {
     document.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
 
-      cursor.style.left = mouseX + 'px';
-      cursor.style.top = mouseY + 'px';
+      cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
     });
 
     // Follower easing interpolation loop
@@ -48,8 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
       posX += (mouseX - posX) * 0.15;
       posY += (mouseY - posY) * 0.15;
 
-      follower.style.left = posX + 'px';
-      follower.style.top = posY + 'px';
+      follower.style.transform = `translate3d(${posX}px, ${posY}px, 0) translate(-50%, -50%)`;
     });
 
     // Hover states for links and interactive items
@@ -66,48 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. SCROLL PROGRESS & FLOATING NAV SHADING
-  const header = document.getElementById('header');
-  const scrollProgress = document.getElementById('scroll-progress');
-  const navLinks = document.querySelectorAll('.nav-link');
-  const sections = document.querySelectorAll('section');
-
-  window.addEventListener('scroll', () => {
-    const currentScroll = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-
-    // Shade nav bar
-    if (header) {
-      if (currentScroll > 50) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
-    }
-
-    // Scroll progress line
-    if (scrollProgress && maxScroll > 0) {
-      const percentage = (currentScroll / maxScroll) * 100;
-      scrollProgress.style.width = percentage + '%';
-    }
-
-    // Active Navigation Highlighting depending on section position
-    let currentSectionId = 'hero';
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop - 150; // offset for nav bar height
-      const sectionHeight = section.offsetHeight;
-      if (currentScroll >= sectionTop && currentScroll < sectionTop + sectionHeight) {
-        currentSectionId = section.getAttribute('id');
-      }
-    });
-
-    navLinks.forEach(link => {
-      link.classList.remove('active');
-      if (link.getAttribute('href') === `#${currentSectionId}`) {
-        link.classList.add('active');
-      }
-    });
-  });
+  // 3. SCROLL TRIGGERS AND NAV HIGHLIGHTING MANAGED BY GSAP SCROLLTRIGGER IN INIT
 
   // 4. MOBILE NAVIGATION DRAWER
   const mobileBtn = document.getElementById('mobile-menu-btn');
@@ -136,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    navLinks.forEach(link => {
+    document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => {
         navMenu.classList.remove('open');
         const icon = mobileBtn.querySelector('i');
@@ -150,81 +108,140 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 5. 3D CARD TILT EFFECT (VANILLA JS TRANSFORM MAPPING)
   const cards = document.querySelectorAll('[data-tilt]');
+  const hasHover = window.matchMedia('(hover: hover)').matches;
 
-  cards.forEach(card => {
-    const cardInner = card.querySelector('.project-inner') || card.querySelector('.hero-image-inner') || card.querySelector('.cert-card');
-    const targetElement = cardInner || card;
-    if (!targetElement) return;
+  if (hasHover) {
+    cards.forEach(card => {
+      const cardInner = card.querySelector('.project-inner') || card.querySelector('.hero-image-inner') || card.querySelector('.cert-card');
+      const targetElement = cardInner || card;
+      if (!targetElement) return;
 
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      let rect = null;
 
-      // Calculate tilt degrees (-10 to 10)
-      const tiltX = ((x / rect.width) - 0.5) * 20;
-      const tiltY = -(((y / rect.height) - 0.5) * 20);
-
-      gsap.to(targetElement, {
-        rotateY: tiltX,
-        rotateX: tiltY,
-        scale: 1.03,
-        boxShadow: `0 15px 40px rgba(0, 242, 254, 0.15)`,
-        duration: 0.3,
-        ease: 'power2.out',
-        overwrite: 'auto'
+      card.addEventListener('mouseenter', () => {
+        rect = card.getBoundingClientRect();
       });
-    });
 
-    card.addEventListener('mouseleave', () => {
-      gsap.to(targetElement, {
-        rotateY: 0,
-        rotateX: 0,
-        scale: 1,
-        boxShadow: card.classList.contains('glass-card') ? `0 8px 32px 0 rgba(0, 0, 0, 0.37)` : `0 8px 32px 0 rgba(0, 0, 0, 0.37)`,
-        duration: 0.6,
-        ease: 'power3.out',
-        overwrite: 'auto'
-      });
-    });
-  });
+      card.addEventListener('mousemove', (e) => {
+        if (!rect) rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-  // 5.5 HERO IMAGE SCROLL PARALLAX & ZOOM
-  window.addEventListener('scroll', () => {
-    const heroImg = document.querySelector('.hero-img');
-    if (heroImg) {
-      const rect = heroImg.parentElement.getBoundingClientRect();
-      const yOffset = window.scrollY;
-      const elementOffset = heroImg.offsetTop;
-      const distance = yOffset - elementOffset;
+        // Calculate tilt degrees (-10 to 10)
+        const tiltX = ((x / rect.width) - 0.5) * 20;
+        const tiltY = -(((y / rect.height) - 0.5) * 20);
 
-      if (distance < 800 && distance > -400) {
-        gsap.to(heroImg, {
-          y: distance * 0.3,
-          scale: 1 + (distance * 0.0002),
-          duration: 0.1,
+        gsap.to(targetElement, {
+          rotateY: tiltX,
+          rotateX: tiltY,
+          scale: 1.03,
+          boxShadow: `0 15px 40px rgba(0, 242, 254, 0.15)`,
+          duration: 0.3,
+          ease: 'power2.out',
           overwrite: 'auto'
         });
-      }
+      });
+
+      card.addEventListener('mouseleave', () => {
+        rect = null;
+        gsap.to(targetElement, {
+          rotateY: 0,
+          rotateX: 0,
+          scale: 1,
+          boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.37)`,
+          duration: 0.6,
+          ease: 'power3.out',
+          overwrite: 'auto'
+        });
+      });
+    });
+  }
+
+  // 5.5 HERO AND CERTIFICATE PARALLAX HANDLED BY GSAP SCROLLTRIGGER IN INIT
+
+  // 6. GSAP & LENIS INTEGRATED SCROLL & TRANSITIONS
+  function initAnimationsAndScroll() {
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Initialize Lenis Smooth Scroll
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      smoothTouch: false
+    });
+
+    // Connect Lenis to ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
+    });
+
+    // Disable lag smoothing to prevent animation jitter during scroll
+    gsap.ticker.lagSmoothing(0);
+
+    // Handle smooth scroll anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        const target = document.querySelector(targetId);
+        if (target) {
+          lenis.scrollTo(target, {
+            offset: this.classList.contains('logo') ? 0 : -80 // custom offset for nav bar
+          });
+        }
+      });
+    });
+
+    // Scroll Progress Line
+    const scrollProgress = document.getElementById('scroll-progress');
+    if (scrollProgress) {
+      gsap.to(scrollProgress, {
+        scrollTrigger: {
+          trigger: 'body',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: true
+        },
+        width: '100%',
+        ease: 'none'
+      });
     }
 
-    // Certificate images parallax
-    document.querySelectorAll('.cert-preview-img').forEach((img, index) => {
-      const rect = img.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        const speed = 0.5 + (index * 0.1);
-        gsap.to(img, {
-          y: (window.scrollY - img.offsetTop) * speed * 0.1,
-          duration: 0.1,
-          overwrite: 'auto'
-        });
-      }
-    });
-  });
+    // Shade header on scroll
+    const header = document.getElementById('header');
+    if (header) {
+      ScrollTrigger.create({
+        start: 'top -50',
+        onToggle: (self) => {
+          header.classList.toggle('scrolled', self.isActive);
+        }
+      });
+    }
 
-  // 6. GSAP SCROLLTRIGGER SCROLL-IN TRANSITIONS
-  function initGSAPAnimations() {
-    gsap.registerPlugin(ScrollTrigger);
+    // Active Navigation Highlighting depending on section position
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    sections.forEach(section => {
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 150px',
+        end: 'bottom 150px',
+        onToggle: (self) => {
+          if (self.isActive) {
+            const id = section.getAttribute('id');
+            navLinks.forEach(link => {
+              link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+            });
+          }
+        }
+      });
+    });
 
     // Hero Entry animations
     const tlHero = gsap.timeline();
@@ -234,6 +251,40 @@ document.addEventListener('DOMContentLoaded', () => {
       .from('.hero-desc', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
       .from('.hero-buttons', { y: 20, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.5')
       .from('.hero-visual', { scale: 0.5, opacity: 0, duration: 1.2, ease: 'elastic.out(1, 0.5)' }, '-=0.8');
+
+    // Hero Image Scroll Parallax & Zoom
+    const heroImg = document.querySelector('.hero-img');
+    if (heroImg) {
+      gsap.to(heroImg, {
+        scrollTrigger: {
+          trigger: '#hero',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        },
+        y: 100,
+        scale: 1.15,
+        ease: 'none'
+      });
+    }
+
+    // Certificate preview image parallax animations
+    document.querySelectorAll('.cert-card').forEach((card, index) => {
+      const img = card.querySelector('.cert-preview-img');
+      if (img) {
+        const speed = 0.5 + (index * 0.15);
+        gsap.to(img, {
+          scrollTrigger: {
+            trigger: card,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true
+          },
+          y: 40 * speed,
+          ease: 'none'
+        });
+      }
+    });
 
     // Section Titles reveal
     document.querySelectorAll('.section-title').forEach(title => {
@@ -386,6 +437,70 @@ document.addEventListener('DOMContentLoaded', () => {
       duration: 0.8,
       ease: 'power2.out'
     });
+
+    // 8. SCROLL-WALKING CHARACTER CONTROLLER
+    const character = document.getElementById('walking-character');
+    const innerChar = document.getElementById('walking-character-inner');
+    const speechBubble = document.getElementById('character-speech');
+
+    if (character && innerChar) {
+      let scrollTimeout = null;
+
+      const speechQuotes = [
+        "Hi! I'm Sandipan 👋",
+        "Keep scrolling! 🚀",
+        "Coding is my superpower! 💻",
+        "AI & ML student here! 🧠",
+        "Designing experiences... ✨",
+        "Let's build something epic! 🛠️",
+        "Need a developer? Contact me! 📬"
+      ];
+
+      function randomizeSpeech() {
+        const idx = Math.floor(Math.random() * speechQuotes.length);
+        if (speechBubble) speechBubble.textContent = speechQuotes[idx];
+      }
+
+      character.addEventListener('mouseenter', randomizeSpeech);
+      character.addEventListener('click', () => {
+        randomizeSpeech();
+        gsap.fromTo(character, { scale: 1 }, { scale: 1.2, duration: 0.15, yoyo: true, repeat: 1 });
+      });
+
+      // Move character across the screen
+      gsap.to(character, {
+        scrollTrigger: {
+          trigger: 'body',
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.4
+        },
+        x: '84vw',
+        ease: 'none'
+      });
+
+      // Track scroll direction and active walking state
+      ScrollTrigger.create({
+        trigger: 'body',
+        start: 'top top',
+        end: 'bottom bottom',
+        onUpdate: (self) => {
+          // Flip character direction based on scroll direction
+          if (self.direction === 1) {
+            innerChar.style.transform = 'scaleX(1)';
+          } else if (self.direction === -1) {
+            innerChar.style.transform = 'scaleX(-1)';
+          }
+
+          character.classList.add('is-walking');
+
+          clearTimeout(scrollTimeout);
+          scrollTimeout = setTimeout(() => {
+            character.classList.remove('is-walking');
+          }, 150);
+        }
+      });
+    }
   }
 });
 
@@ -511,74 +626,3 @@ async function submitForm() {
     });
   }, 10000);
 }
-
-// 8. SCROLL-WALKING CHARACTER CONTROLLER
-// ─────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  const character = document.getElementById('walking-character');
-  const innerChar = document.getElementById('walking-character-inner');
-  const speechBubble = document.getElementById('character-speech');
-
-  if (!character || !innerChar) return;
-
-  let lastScrollY = window.scrollY;
-  let scrollTimeout = null;
-
-  const speechQuotes = [
-    "Hi! I'm Sandipan 👋",
-    "Keep scrolling! 🚀",
-    "Coding is my superpower! 💻",
-    "AI & ML student here! 🧠",
-    "Designing experiences... ✨",
-    "Let's build something epic! 🛠️",
-    "Need a developer? Contact me! 📬"
-  ];
-
-  function randomizeSpeech() {
-    const idx = Math.floor(Math.random() * speechQuotes.length);
-    if (speechBubble) speechBubble.textContent = speechQuotes[idx];
-  }
-
-  character.addEventListener('mouseenter', randomizeSpeech);
-  character.addEventListener('click', () => {
-    randomizeSpeech();
-    gsap.fromTo(character, { scale: 1 }, { scale: 1.2, duration: 0.15, yoyo: true, repeat: 1 });
-  });
-
-  window.addEventListener('scroll', () => {
-    const currentScrollY = window.scrollY;
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    if (maxScroll <= 0) return;
-
-    const scrollPercent = currentScrollY / maxScroll;
-    const minPct = 8;
-    const maxPct = 92;
-    const currentPct = minPct + (scrollPercent * (maxPct - minPct));
-
-    gsap.to(character, {
-      left: `${currentPct}%`,
-      duration: 0.4,
-      ease: 'power1.out'
-    });
-
-    if (currentScrollY > lastScrollY) {
-      innerChar.style.transform = 'scaleX(1)';
-    } else if (currentScrollY < lastScrollY) {
-      innerChar.style.transform = 'scaleX(-1)';
-    }
-
-    character.classList.add('is-walking');
-
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(() => {
-      character.classList.remove('is-walking');
-    }, 150);
-
-    lastScrollY = currentScrollY;
-  });
-});
-
-
-
-// ═══════════════════════════════════════════════════════════════════════════════
-
