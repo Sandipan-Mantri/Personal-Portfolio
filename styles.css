@@ -246,6 +246,10 @@ body {
 /* Responsive */
 @media (max-width: 767px) {
   .scroll-character {
+    top: auto !important;
+    left: auto !important;
+    bottom: 20px !important;
+    right: 20px !important;
     width: 80px;
     height: 112px;
   }
@@ -254,10 +258,31 @@ body {
     width: 80px;
     height: 112px;
   }
+
+  .runner-popup {
+    left: auto;
+    right: calc(100% + 10px);
+    top: 50%;
+    transform: translateY(-50%) translateX(-6px);
+  }
+
+  .runner-popup.is-open {
+    transform: translateY(-50%) translateX(0);
+  }
+
+  .runner-popup-tags {
+    flex-wrap: wrap;
+    max-width: 140px;
+    justify-content: flex-end;
+  }
 }
 
 @media (max-width: 479px) {
   .scroll-character {
+    top: auto !important;
+    left: auto !important;
+    bottom: 16px !important;
+    right: 16px !important;
     width: 64px;
     height: 90px;
   }
@@ -892,7 +917,7 @@ header.scrolled {
 /* --- TECHNICAL SKILLS SECTION --- */
 .skills-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 32px;
 }
 
@@ -1045,7 +1070,7 @@ header.scrolled {
 /* --- PROJECTS SECTION --- */
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 32px;
 }
 
@@ -1148,7 +1173,7 @@ header.scrolled {
 /* --- CERTIFICATIONS SECTION --- */
 .certifications-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
   gap: 40px;
   margin-bottom: 60px;
 }
@@ -1477,7 +1502,7 @@ footer {
 
 .strengths-grid-tags {
   display: grid;
-  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
   gap: 14px;
 }
 
@@ -1845,8 +1870,8 @@ footer {
   }
 
   .nav-menu {
-    display: none;
-    /* Hide standard nav list */
+    display: flex;
+    /* Hide standard nav list by default using opacity/transform */
     position: absolute;
     top: 100%;
     left: 0;
@@ -1860,10 +1885,17 @@ footer {
     gap: 20px;
     align-items: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .nav-menu.open {
-    display: flex;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
   }
 
   .mobile-menu-btn {
@@ -1986,9 +2018,7 @@ footer {
   }
 
   .skill-badge {
-    width: 100%;
-    justify-content: center;
-    padding: 10px 12px;
+    padding: 10px 14px;
     font-size: 0.88rem;
   }
 

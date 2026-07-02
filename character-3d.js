@@ -556,15 +556,25 @@
     // Scroll mapping path displacement
     const el = document.getElementById('scroll-character');
     if (el && typeof gsap !== 'undefined') {
-      const bX = Math.max(window.innerWidth - CFG.canvasWidth - 36, 0);
-      const bY = Math.max(window.innerHeight - CFG.canvasHeight - 36, 0);
-      const tX = 20 + bX * fraction + Math.sin(fraction * Math.PI * 2) * 16;
-      const tY = 20 + bY * (0.25 + fraction * 0.45) + Math.cos(fraction * Math.PI * 3) * 12;
-      gsap.to(el, {
-        x: tX - 20, y: tY - 20,
-        rotation: animState === 'run' ? (fraction - 0.5) * 10 : (fraction - 0.5) * 4,
-        duration: 0.22, ease: 'power3.out', overwrite: 'auto',
-      });
+      if (window.innerWidth < 768) {
+        // Dock statically at bottom-right on mobile viewports (layout handled via CSS bottom/right)
+        gsap.to(el, {
+          x: 0, y: 0,
+          rotation: 0,
+          duration: 0.3, ease: 'power3.out', overwrite: 'auto',
+        });
+      } else {
+        // Desktop scroll animation path
+        const bX = Math.max(window.innerWidth - CFG.canvasWidth - 36, 0);
+        const bY = Math.max(window.innerHeight - CFG.canvasHeight - 36, 0);
+        const tX = 20 + bX * fraction + Math.sin(fraction * Math.PI * 2) * 16;
+        const tY = 20 + bY * (0.25 + fraction * 0.45) + Math.cos(fraction * Math.PI * 3) * 12;
+        gsap.to(el, {
+          x: tX - 20, y: tY - 20,
+          rotation: animState === 'run' ? (fraction - 0.5) * 10 : (fraction - 0.5) * 4,
+          duration: 0.22, ease: 'power3.out', overwrite: 'auto',
+        });
+      }
     }
 
     // Face rotation
