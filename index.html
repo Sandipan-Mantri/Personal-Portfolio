@@ -28,20 +28,15 @@
   <div id="canvas-container"></div>
 
   <!-- Scroll-linked 3D Character -->
-  <div class="scroll-character" id="scroll-character" role="button" tabindex="0" aria-label="3D character guide"
-    aria-expanded="false">
-    <canvas id="character-canvas"></canvas>
-    <div class="runner-popup" id="runner-popup" role="dialog" aria-label="Character info">
-      <div class="runner-popup-inner">
-        <strong>🧑‍💻 Mini-Mantri</strong>
-        <div class="runner-popup-tags">
-          <span>🧍 </span>
-          <span>🚶 </span>
-          <span>🏃 </span>
-        </div>
-      </div>
-    </div>
+ <div class="scroll-character" id="scroll-character" role="button" tabindex="0"
+  aria-label="Wave to Mini Mantri" aria-expanded="false">
+
+  <canvas id="character-canvas" aria-label="Animated Mini-Mantri character"></canvas>
+
+  <div class="character-name-popup" id="character-name-popup" role="status" aria-live="polite">
+    Mini Mantri
   </div>
+</div>
   <!-- Preloader Screen -->
   <div id="preloader">
     <div class="loader-logo">SANDIPAN MANTRI<span></span></div>
@@ -109,21 +104,12 @@
             </div>
           </div>
           <!-- 3D Interactive Floating Badges -->
-          <div class="hero-badge hero-badge-1">
-            <i class="fa-solid fa-brain text-gradient"></i>
-            <div class="details">
-              <span>Expertise</span>
-              <p>AI & ML</p>
-            </div>
-          </div>
           <div class="hero-badge hero-badge-2">
             <i class="fa-solid fa-code text-gradient"></i>
             <div class="details">
-              <span>Engineer</span>
-              <p>Web Development & Python</p>
+              <span>Languages</span>
+              <p>Python, C, SQL</p>
             </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>

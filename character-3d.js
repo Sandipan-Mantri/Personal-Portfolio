@@ -1,6 +1,5 @@
-// --- PROCEDURAL 3D REALISTIC HUMAN CHARACTER ---
-// Renders a stylized-realistic male figure using Three.js geometry primitives.
-// Matches Sandipan's look: dark wavy hair, dark shirt, slim build.
+// --- RIGGED 3D MINI-MANTRI CHARACTER ---
+// Renders a stylized developer avatar from Three.js geometry primitives.
 // Animations: idle, walk, run, sit, wave (on hover) — driven by scroll velocity & cursor tracking.
 
 (function () {
@@ -13,13 +12,14 @@
     cameraDist: 5.6,
     cameraY: 0.7,
     // Appearance
-    skinColor: 0xc8956e,
-    skinDark: 0xb07a58,
-    hairColor: 0x0e0804,
-    shirtColor: 0x00f2fe,
-    pantsColor: 0x9d4edd,
-    shoeColor: 0x111111,
-    beltColor: 0x111111,
+    skinColor: 0xd79a73,
+    skinDark: 0xaf6e52,
+    hairColor: 0x151319,
+    shirtColor: 0x182f69,
+    pantsColor: 0x242938,
+    shoeColor: 0xf2e8d8,
+    shoeSoleColor: 0x1d315d,
+    accentColor: 0x37d9df,
     eyeWhite: 0xf0ece6,
     eyeIris: 0x2a1a0e,
     eyePupil: 0x050503,
@@ -50,6 +50,8 @@
   let scrollVelocity = 0;
   let idleTimer = 0;
   let isHovered = false;
+  let isGreeting = false;
+  let greetingTimer;
 
   // Normalized mouse coordinates (-1 to 1) for head look-at tracking
   let mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
@@ -64,7 +66,7 @@
     });
   }
 
-  // ── Build Realistic Human ──
+  // ── Build Mini-Mantri ──
   function buildCharacter() {
     rootGroup = new THREE.Group();
     rootGroup.position.set(0, -1.35, 0);
@@ -74,12 +76,12 @@
     hip.position.set(0, 1.0, 0);
     rootGroup.add(hip);
 
-    // Belt
-    const beltGeo = new THREE.TorusGeometry(0.21, 0.015, 8, 24);
-    const beltMesh = new THREE.Mesh(beltGeo, mat(CFG.beltColor, { roughness: 0.55 }));
-    beltMesh.position.set(0, 0.0, 0);
-    beltMesh.rotation.x = Math.PI * 0.5;
-    hip.add(beltMesh);
+    // Hoodie hem
+    const hemGeo = new THREE.TorusGeometry(0.245, 0.018, 8, 20);
+    const hem = new THREE.Mesh(hemGeo, mat(0x112454, { roughness: 0.9 }));
+    hem.position.set(0, 0.02, 0);
+    hem.rotation.x = Math.PI * 0.5;
+    hip.add(hem);
 
     // ── SPINE ──
     const spine = new THREE.Group();
@@ -87,31 +89,71 @@
     hip.add(spine);
 
     // Torso
-    const torsoGeo = new THREE.CylinderGeometry(0.24, 0.21, 0.55, 12);
+    const torsoGeo = new THREE.CylinderGeometry(0.27, 0.245, 0.58, 16);
     const torsoMesh = new THREE.Mesh(torsoGeo, mat(CFG.shirtColor, { roughness: 0.92 }));
-    torsoMesh.position.set(0, 0.28, 0);
+    torsoMesh.position.set(0, 0.29, 0);
     spine.add(torsoMesh);
 
     // Shoulders
-    const shoulderGeo = new THREE.SphereGeometry(0.26, 12, 8);
+    const shoulderGeo = new THREE.SphereGeometry(0.29, 14, 9);
     const shoulderMesh = new THREE.Mesh(shoulderGeo, mat(CFG.shirtColor, { roughness: 0.92 }));
-    shoulderMesh.position.set(0, 0.5, 0);
-    shoulderMesh.scale.set(1.1, 0.35, 0.85);
+    shoulderMesh.position.set(0, 0.53, 0);
+    shoulderMesh.scale.set(1.15, 0.37, 0.9);
     spine.add(shoulderMesh);
 
     // Collar
-    const collarGeo = new THREE.CylinderGeometry(0.2, 0.22, 0.05, 12);
+    const collarGeo = new THREE.CylinderGeometry(0.2, 0.24, 0.07, 14);
     const collarMesh = new THREE.Mesh(collarGeo, mat(CFG.shirtColor, { roughness: 0.88 }));
-    collarMesh.position.set(0, 0.56, 0);
+    collarMesh.position.set(0, 0.58, 0);
     spine.add(collarMesh);
 
-    // Buttons
-    for (let i = 0; i < 4; i++) {
-      const btnGeo = new THREE.SphereGeometry(0.01, 6, 4);
-      const btn = new THREE.Mesh(btnGeo, mat(0x222222));
-      btn.position.set(0, 0.15 + i * 0.1, 0.21);
-      spine.add(btn);
-    }
+    // Hood, drawstrings, pocket, and cyan code badge.
+    const hood = new THREE.Mesh(
+      new THREE.TorusGeometry(0.205, 0.05, 8, 18),
+      mat(0x112759, { roughness: 0.9 })
+    );
+    hood.position.set(0, 0.58, -0.035);
+    hood.rotation.x = Math.PI * 0.5;
+    hood.scale.set(1, 0.8, 1);
+    spine.add(hood);
+
+    [-0.055, 0.055].forEach(x => {
+      const string = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.008, 0.008, 0.16, 6),
+        mat(0xe8e2d8, { roughness: 0.7 })
+      );
+      string.position.set(x, 0.42, 0.255);
+      string.rotation.x = 0.05;
+      spine.add(string);
+      const tip = new THREE.Mesh(new THREE.SphereGeometry(0.012, 6, 5), mat(CFG.accentColor));
+      tip.position.set(x, 0.335, 0.258);
+      spine.add(tip);
+    });
+
+    const pocket = new THREE.Mesh(
+      new THREE.BoxGeometry(0.29, 0.13, 0.025),
+      mat(0x12295e, { roughness: 0.9 })
+    );
+    pocket.position.set(0, 0.2, 0.255);
+    pocket.rotation.x = -0.08;
+    spine.add(pocket);
+
+    [-1, 1].forEach(side => {
+      const codeStroke = new THREE.Mesh(
+        new THREE.BoxGeometry(0.012, 0.068, 0.012),
+        mat(CFG.accentColor, { emissive: CFG.accentColor, emissiveIntensity: 0.2 })
+      );
+      codeStroke.position.set(side * 0.095, 0.39, 0.275);
+      codeStroke.rotation.z = side * -0.62;
+      spine.add(codeStroke);
+    });
+    const slash = new THREE.Mesh(
+      new THREE.BoxGeometry(0.012, 0.082, 0.012),
+      mat(CFG.accentColor, { emissive: CFG.accentColor, emissiveIntensity: 0.2 })
+    );
+    slash.position.set(0, 0.39, 0.276);
+    slash.rotation.z = -0.35;
+    spine.add(slash);
 
     // ── NECK ──
     const neckGeo = new THREE.CylinderGeometry(0.065, 0.075, 0.1, 10);
@@ -125,7 +167,7 @@
     spine.add(headGroup);
 
     // Head sphere
-    const headGeo = new THREE.SphereGeometry(0.165, 16, 14);
+    const headGeo = new THREE.SphereGeometry(0.185, 18, 16);
     const headMesh = new THREE.Mesh(headGeo, mat(CFG.skinColor, { roughness: 0.48 }));
     headMesh.scale.set(1, 1.05, 0.95);
     headGroup.add(headMesh);
@@ -174,12 +216,23 @@
       pupil.position.set(side * 0.058, 0.02, 0.155);
       headGroup.add(pupil);
 
-      const browGeo = new THREE.BoxGeometry(0.05, 0.012, 0.018);
+      const browGeo = new THREE.BoxGeometry(0.06, 0.012, 0.018);
       const brow = new THREE.Mesh(browGeo, mat(CFG.hairColor, { roughness: 0.9 }));
       brow.position.set(side * 0.058, 0.055, 0.135);
       brow.rotation.z = side * -0.12;
       headGroup.add(brow);
     });
+
+    // Round developer glasses: two frames plus a bridge.
+    const glassesMat = mat(0x171923, { roughness: 0.35, metalness: 0.35 });
+    [-1, 1].forEach(side => {
+      const frame = new THREE.Mesh(new THREE.TorusGeometry(0.053, 0.006, 6, 16), glassesMat);
+      frame.position.set(side * 0.06, 0.018, 0.173);
+      headGroup.add(frame);
+    });
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.028, 0.008, 0.01), glassesMat);
+    bridge.position.set(0, 0.018, 0.173);
+    headGroup.add(bridge);
 
     // Mouth & ears
     const mouthGeo = new THREE.BoxGeometry(0.05, 0.007, 0.01);
@@ -247,10 +300,10 @@
     rightShoulderGroup.position.set(0.3, 0.5, 0);
     spine.add(rightShoulderGroup);
 
-    const armGeo = new THREE.CylinderGeometry(0.045, 0.04, 0.28, 8);
+    const armGeo = new THREE.CylinderGeometry(0.052, 0.043, 0.29, 10);
     const armMat = mat(CFG.shirtColor, { roughness: 0.9 });
     const skinMat = mat(CFG.skinColor, { roughness: 0.5 });
-    const forearmGeo = new THREE.CylinderGeometry(0.038, 0.032, 0.24, 8);
+    const forearmGeo = new THREE.CylinderGeometry(0.044, 0.036, 0.22, 10);
     const handGeo = new THREE.SphereGeometry(0.033, 8, 6);
 
     // Left arm
@@ -264,9 +317,12 @@
     const leftForearm = new THREE.Group();
     leftForearm.position.set(0, -0.28, 0);
     leftUpperArm.add(leftForearm);
-    const lForearmMesh = new THREE.Mesh(forearmGeo, skinMat);
+    const lForearmMesh = new THREE.Mesh(forearmGeo, armMat);
     lForearmMesh.position.set(0, -0.12, 0);
     leftForearm.add(lForearmMesh);
+    const lCuff = new THREE.Mesh(new THREE.CylinderGeometry(0.047, 0.043, 0.035, 10), mat(0x102553));
+    lCuff.position.set(0, -0.225, 0);
+    leftForearm.add(lCuff);
     const lHand = new THREE.Mesh(handGeo, skinMat);
     lHand.position.set(0, -0.26, 0);
     leftForearm.add(lHand);
@@ -282,9 +338,12 @@
     const rightForearm = new THREE.Group();
     rightForearm.position.set(0, -0.28, 0);
     rightUpperArm.add(rightForearm);
-    const rForearmMesh = new THREE.Mesh(forearmGeo, skinMat);
+    const rForearmMesh = new THREE.Mesh(forearmGeo, armMat);
     rForearmMesh.position.set(0, -0.12, 0);
     rightForearm.add(rForearmMesh);
+    const rCuff = new THREE.Mesh(new THREE.CylinderGeometry(0.047, 0.043, 0.035, 10), mat(0x102553));
+    rCuff.position.set(0, -0.225, 0);
+    rightForearm.add(rCuff);
     const rHand = new THREE.Mesh(handGeo, skinMat);
     rHand.position.set(0, -0.26, 0);
     rightForearm.add(rHand);
@@ -298,11 +357,11 @@
     rightHipJoint.position.set(0.09, 0, 0);
     hip.add(rightHipJoint);
 
-    const upperLegGeo = new THREE.CylinderGeometry(0.065, 0.055, 0.38, 8);
+    const upperLegGeo = new THREE.CylinderGeometry(0.075, 0.06, 0.38, 10);
     const pantsMat = mat(CFG.pantsColor, { roughness: 0.85 });
-    const lowerLegGeo = new THREE.CylinderGeometry(0.05, 0.042, 0.34, 8);
-    const shoeGeo = new THREE.BoxGeometry(0.08, 0.048, 0.14);
-    const shoeMat = mat(CFG.shoeColor, { roughness: 0.55, metalness: 0.08 });
+    const lowerLegGeo = new THREE.CylinderGeometry(0.058, 0.047, 0.34, 10);
+    const shoeGeo = new THREE.BoxGeometry(0.105, 0.06, 0.17);
+    const shoeMat = mat(CFG.shoeColor, { roughness: 0.65 });
 
     // Left leg
     const leftUpperLeg = new THREE.Group();
@@ -310,6 +369,9 @@
     const lULegMesh = new THREE.Mesh(upperLegGeo, pantsMat);
     lULegMesh.position.set(0, -0.19, 0);
     leftUpperLeg.add(lULegMesh);
+    const lPocket = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.105, 0.072), mat(0x1a2030));
+    lPocket.position.set(-0.07, -0.18, 0.015);
+    leftUpperLeg.add(lPocket);
 
     const leftKnee = new THREE.Group();
     leftKnee.position.set(0, -0.38, 0);
@@ -320,6 +382,9 @@
     const lShoe = new THREE.Mesh(shoeGeo, shoeMat);
     lShoe.position.set(0, -0.37, 0.02);
     leftKnee.add(lShoe);
+    const lSole = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.018, 0.178), mat(CFG.shoeSoleColor));
+    lSole.position.set(0, -0.4, 0.02);
+    leftKnee.add(lSole);
 
     // Right leg
     const rightUpperLeg = new THREE.Group();
@@ -327,6 +392,9 @@
     const rULegMesh = new THREE.Mesh(upperLegGeo, pantsMat);
     rULegMesh.position.set(0, -0.19, 0);
     rightUpperLeg.add(rULegMesh);
+    const rPocket = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.105, 0.072), mat(0x1a2030));
+    rPocket.position.set(0.07, -0.18, 0.015);
+    rightUpperLeg.add(rPocket);
 
     const rightKnee = new THREE.Group();
     rightKnee.position.set(0, -0.38, 0);
@@ -337,6 +405,9 @@
     const rShoe = new THREE.Mesh(shoeGeo, shoeMat);
     rShoe.position.set(0, -0.37, 0.02);
     rightKnee.add(rShoe);
+    const rSole = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.018, 0.178), mat(CFG.shoeSoleColor));
+    rSole.position.set(0, -0.4, 0.02);
+    rightKnee.add(rSole);
 
     ch = {
       root: rootGroup,
@@ -534,10 +605,10 @@
 
     let newState = 'idle';
 
-    if (isHovered) {
+    if (isHovered || isGreeting) {
       // Hover override triggers greeting wave
       newState = 'wave';
-    } else if (fraction > CFG.sitThreshold && dY < 2) {
+    } else if (dY < CFG.walkThreshold && idleTimer > 400) {
       newState = 'sit';
     } else if (dY < CFG.walkThreshold) {
       idleTimer += dT;
@@ -581,7 +652,7 @@
     if (dY > 1 && !isHovered) {
       const dir = curY > lastScrollY ? 1 : -1;
       rootGroup.rotation.y += (dir * 0.25 - rootGroup.rotation.y) * 0.1;
-    } else if (isHovered) {
+    } else if (isHovered || isGreeting) {
       // Return to face center when waving/hovered
       rootGroup.rotation.y += (0.0 - rootGroup.rotation.y) * 0.1;
     }
@@ -593,8 +664,20 @@
   // ── Listeners ──
   function initListeners() {
     const c = document.getElementById('scroll-character');
-    const p = document.getElementById('runner-popup');
-    if (!c || !p) return;
+    const namePopup = document.getElementById('character-name-popup');
+    if (!c || !namePopup) return;
+
+    const greetVisitor = () => {
+      isGreeting = true;
+      namePopup.classList.add('is-open');
+      c.setAttribute('aria-expanded', 'true');
+      window.clearTimeout(greetingTimer);
+      greetingTimer = window.setTimeout(() => {
+        isGreeting = false;
+        namePopup.classList.remove('is-open');
+        c.setAttribute('aria-expanded', 'false');
+      }, 2200);
+    };
 
     // Hover triggers state override
     c.addEventListener('mouseenter', () => {
@@ -607,22 +690,13 @@
 
     c.addEventListener('click', e => {
       e.stopPropagation();
-      const open = p.classList.toggle('is-open');
-      c.setAttribute('aria-expanded', open ? 'true' : 'false');
+      greetVisitor();
     });
 
     c.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        const open = p.classList.toggle('is-open');
-        c.setAttribute('aria-expanded', open ? 'true' : 'false');
-      }
-    });
-
-    document.addEventListener('click', e => {
-      if (!c.contains(e.target)) {
-        p.classList.remove('is-open');
-        c.setAttribute('aria-expanded', 'false');
+        greetVisitor();
       }
     });
 

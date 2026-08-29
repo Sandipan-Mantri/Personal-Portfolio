@@ -113,8 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 4. RUNNER POPUP INTERACTION — now handled by character-3d.js
-
   // 5. MOBILE NAVIGATION DRAWER
   const mobileBtn = document.getElementById('mobile-menu-btn');
   const navMenu = document.getElementById('nav-menu');
